@@ -1,955 +1,1592 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>PS3 Toolset by @bguerville</title>
-		<script type='text/javascript' src="js/logger.pmin.js"></script>
-		<script>
-			"use strict"
-			var token='';
-			var ftoken='';
-			var libraries = [
-				{'library':'cookies','async':true,'fail':0,'url':'js/js.cookie.min.js','data':null},
-				{'library':'jquery','async':true,'fail':0,'url':'js/jquery-1.12.4.min.js','data':null},
-				{'library':'jqueryui','async':true,'fail':0,'url':'js/jquery-ui.min.js','data':null},
-				{'library':'mscb','async':true,'fail':0,'url':'js/mCustomScrollbar.concat.min.js','data':null},
-				{'library':'toast','async':true,'fail':0,'url':'js/toastmessage.min.js','data':null}
 
-				,
-				{'library':'jstree','async':true,'fail':0,'url':'js/jstree.min.js','data':null},
-				{'library':'switch','async':true,'fail':0,'url':'js/jquery.switchButton.min.js','data':null}//,
-				//{'library':'splitter','async':true,'fail':0,'url':'js/jquery.splitter/jquery.splitter-1.5.1.js','data':null},
-				//{'library':'tablesorter','async':true,'fail':0,'url':'js/jquery.tablesorter-2.7.2.min.js','data':null}
-					];
-			var css = [
-				{'library':'sunny','async':true,'fail':0,'url':'assets/jqueryui/sunny/jquery-ui.pmin.css','data':null},
-				{'library':'eggplant','async':true,'fail':0,'url':'assets/jqueryui/eggplant/jquery-ui.pmin.css','data':null},
-				{'library':'redmond','async':true,'fail':0,'url':'assets/jqueryui/redmond/jquery-ui.pmin.css','data':null},
-				{'library':'hot-sneaks','async':true,'fail':0,'url':'assets/jqueryui/hot-sneaks/jquery-ui.pmin.css','data':null},
-				{'library':'mcsb','async':true,'fail':0,'url':'assets/css/mCustomScrollbar.pmin.css','data':null},
-				{'library':'main','async':true,'fail':0,'url':'assets/css/main.pmin.css','data':null}
-			];
-			var logdone=0;
-
-			var fp9loaded = false;
-			var fp9loader = function(){
-				fp9loaded = true;
-			};
-			var insertSWF = function(divid,swfid,fname){
-				var el = document.getElementById(divid);
-				if(el){
-					var o = document.createElement('object');
-					o.setAttribute('type','application/x-shockwave-flash');
-					o.setAttribute('data','file3.php?tk='+ftoken+'&file='+fname+'.swf');
-					o.id = swfid;
-					o.setAttribute('width','1px');
-					o.setAttribute('height','1px');
-					var pobj=[{name:'menu',value:'false'},{name:'scale',value:'noScale'},{name:'allowScriptAccess',value:'always'},{name:'bgcolor',value:''}];
-					for(var po in pobj){
-						createParams(o,po);
-					}
-					function createParams(ob,paramObj){
-						var p = document.createElement('param');
-						p.setAttribute('name',paramObj.name);
-						p.setAttribute('value',paramObj.value);
-						ob.appendChild(p);
-					}
-					el.parentNode.replaceChild(o,el);
-					return true;
+				<div id='flashmem'>
+				<iframe name='dlframe' id='dlframe' src='blank.php' class='dl-frame ui-helper-hidden'></iframe>
+				<div id='dLoad' class='ui-helper-hidden' title='Load'>
+				<fieldset class='df ui-widget-content ui-corner-all'><div id='dlDialog_Path' class='ldialog-path'>*.*</div></fieldset>
+				<div class='scroll-dialog-box scbload'>
+				<div id='dLTree' class='diag-dtree ui-widget-content ui-corner-all'></div>
+				</div>
+				</div>
+				<div id='dSave_As' class='ui-helper-hidden' title='Save As'>
+				<fieldset class='df ui-widget-content ui-corner-all'><label id='lsDialog_Path' for='sDialog_FileName' class='diag-dldialog-path'></label><input id='sDialog_FileName' name='sDialog_FileName' type='text' class='diag-dsdialog-ipt ui-corner-all'/></fieldset>
+				<div class='scroll-dialog-box scbsave'>
+				<div id='dSTree' class='diag-dtree ui-widget-content ui-corner-all'></div>
+				</div>
+				</div>
+				<h2 align='right' class='tab-header'>Flash Memory Manager <span class='header-tiny-text'>v1.3.1</span></h2>
+				<div id='treecontainer' class='fm-container'>
+				<table id='fmbox' class='window'>
+				<tbody class='window'>
+				<tr class='window-header ui-widget-header'>
+				<th class='logoptions window-header ui-widget-header '><div class='dir-table'><span class='dir-left header-normal-text'>CFW Compatible PS3: <span class='fmm-compat'><span id='cfwcompat'></span></span></span><span class='dir-center header-normal-text'></span><span id='spanmode' class='dir-right-fixed' title='Disabling FMM Strict Mode is very risky.Patching checks & restrictions are disabled when FMM Strict Mode is off.Use at your own risk!!!'><div class='switch-wrapper pointer' tabindex='0'><input type='checkbox' name='mode' id='admode' value='true' checked='true' ></div></span></div></th>
+				</tr>
+				<tr class='window-content-top ui-widget-content'>
+				<td align='justify' class='window-content-top ui-widget-content'>
+				<div id='fTree' class='fm-tree ui-widget-content'></div>
+				</td>
+				</tr>
+				<tr class='pl window-bottom-small'>
+				<td align='justify' class='window-bottom-small'>
+				<div class='sizer height-5px'>XXX</div>
+				</td>
+				</tr>
+				</tbody>
+				</table>
+				<br>
+				<div align='center' id='accordion' >
+				  <h3>Instructions</h3>
+				  <div>
+					<div align='left'>
+						<ul>
+							<li>Click on the various FMM tree nodes to reveal available context menu items.</li>
+							<li>The Flash Memory Patch node's context menu is only enabled if your console is detected to be CFW compatible.</li>
+						</ul>
+					</div>
+				  </div>
+				  <h3>Tips</h3>
+				  <div>
+					<div align='left'>
+						<ul>
+							<li><b>Always keep FMM Strict Mode ON.</b><span class='header-small-text'>Strict Mode OFF is ONLY for DEVELOPERS wishing to use their own custom patches.</span></li>
+							<li><b>Strict Mode OFF.</b><span class='header-small-text'>will let you patch the Flash Memory with any file regardless of its detected validity. You have been warned.</span></li>
+							<li>For performance reasons, avoid using storage directories containing more than a dozen items in total (files & folders).</li>
+							<li>For convenience sake, the SHA256 hashes displayed for each Flash Memory ROS region are calculated on the range of 0x6FFE0 bytes used by standard no-FSM patch files.</li>
+						</ul>
+					</div>
+				  </div>
+				</div>
+				</div>
+				<div id='dfmProgress' class='diag-fmProgress ui-helper-hidden' title='Operations Progress'></div>
+				<div id='ulog' class='ui-helper-hidden'></div>
+				</div>
+				<script>
+				jQuery('.refresh-fm').removeClass('ui-state-disabled').addClass('ui-state-disabled');
+				var ldiag=null;
+				var sdiag=null;
+				var ft1 =null;
+				var pbfm1=null;
+				var dl_object=null;
+				var sha256_ros='';
+				if(!helper.sm){
+					helper.sm = new sysmem();
 				}
-				else{
-					return false;
+				if(!helper.worker['fmm']){
+					helper.worker['fmm'] = new workerThread('BGTOOLSET_WKR_FMM');
 				}
-			};
-      var get_year =function() {return '<?php echo(date('Y')); ?>';};
-      var get_day =function() {return '<?php echo(date('w')); ?>';};
-			var fwv = '4.88';
-			ftoken ='nkuvXulytN6nSzgn4qnROk49SYc3hLP6oWHd6s2wXv09';
-			token ='Bw/qr6BclFhqiJVLfkKbUiy1NKI7HX5jt6F3LjxD/Ok=';
-					function loadLib(idx){
-				var lib_xhr = new XMLHttpRequest();
-				lib_xhr.addEventListener("load", transferLibComplete);
-				lib_xhr.addEventListener("error", transferLibFailed);
-				function cleanLibRequest(){
-					lib_xhr.removeEventListener("load", transferLibComplete);
-					lib_xhr.removeEventListener("error", transferLibFailed);
-					//delete lib_xhr;
+				function updatePD(o,st){
+					pbfm1.updateProgressDialog(o,st);
 				}
-				function transferLibComplete(){
-					cleanLibRequest();
-					libraries[idx].data = this.responseText;
-					eval(libraries[idx].data);
-					if(libraries[idx].library==='jquery' || libraries[idx].library==='mscb'){
-						logdone++;
-						if(logdone===2){
-							var event = document.createEvent('Event');
-							event.initEvent('loadLog', false, false);
-							frames['ifrlog'].window.document.dispatchEvent(event);
-						}
+				function updateBuffer(b,s){
+					ldiag.addPatchInfo(b,s);
+				}
+				function validatePatchFile(buf_po,filename){
+					var _nor = so.is_nor();
+					helper.memory.upokes(buf_po.offset,helper.patch_ros_fragment_start);
+					if(!_nor){
+						helper.memory.upokes(buf_po.offset,getActiveNandROS(so));
 					}
-
-					if(libraries[idx].library==='jqueryui'){
-						insertSWF('FPX2','FP9Test','FP9TesterK3');
-					}
-							libraries[idx].fail=0;
-					idx++;
-					if(idx<libraries.length){
-						loadLib(idx);
+					helper.memory.upokes(buf_po.offset+helper.patchfile_size+0x30,_nor ? helper.patch_ros_fragment_end1:helper.patch_ros_fragment_end2);
+					Logger.info('getSHA256hash 0x'+(buf_po.offset+0x30).toString(16));
+					sha256_ros = getSHA256hash(buf_po.offset+0x30, helper.patchfile_size);
+					if(dl_object && buf_po===dl_object.buffer){dl_object.sha256 = sha256_ros;}
+					updateBuffer(buf_po,sha256_ros);
+					ulog('SHA256 Extraction Complete');
+					Logger.info('Patch File '+filename+' SHA256 checksum: '+sha256_ros);
+					ulog('Patch validation operations complete');
+					if(sha256_ros!==helper.nofsm_hash){
+						if(dl_object && buf_po===dl_object.buffer){toast('Patch Download Error','warning',5);}
+						Logger.warn('Custom patch file detected.');
+						return 1;
 					}
 					else{
-						setTimeout(complete, 500);
+						Logger.info('official patch file detected.');
+						return 0;
 					}
 				}
-				function transferLibFailed(){
-					cleanLibRequest();
-					if(libraries[idx].fail<3){
-						libraries[idx].fail++;
-						loadLib(idx);
+				function updateValidationGUI(start,filename){
+					var jQftree = jQuery('#fTree').jstree(true);
+					if(!jQftree.is_disabled('flashbk')){
+						jQftree.create_node('flashbk',{'id' : 'rosbk', 'type' : 'ros', 'text' : 'ROS' });
+						jQftree.create_node('rosbk',{'id' : 'infobk', 'type' : 'info', 'text' : 'SHA256: '+sha256_ros });
+						jQftree.open_node('rosbk');
+						jQftree.open_node('flashbk');
 					}
-					else{
-						console.log('failed to load '+libraries[idx].library);
-						alert('Failed to load js support library '+libraries[idx].library+' after 3 attempts');
-						throw 'Failed to load js support library '+libraries[idx].library;
-					}
+					setTimeout(function(){
+						helper.sp.playOK();
+						pbfm1.updateProgressDialog({'dlabel':'Idle','glabel':'Patch File \''+filename+'\' loaded & validated','dvalue':100,'gvalue':100,'istatus':'success-image'},start);
+					},250);
 				}
-				lib_xhr.open("get", libraries[idx].url, libraries[idx].async);
-				lib_xhr.send();
-			}
-			loadLib(0);
-			function loadCss(idx){
-				var css_xhr = new XMLHttpRequest();
-				css_xhr.addEventListener("load", transferCssComplete);
-				css_xhr.addEventListener("error", transferCssFailed);
-				function cleanCssRequest(){
-					css_xhr.removeEventListener("load", transferCssComplete);
-					css_xhr.removeEventListener("error", transferCssFailed);
-					//delete css_xhr;
+				function updateNoValidationGUI(buf_po,start,filename){
+					helper.sp.playNG();
+					pbfm1.updateProgressDialog({'glabel':'Loading Operations failed','dlabel':'File validation error','dvalue':100,'gvalue':100,'istatus':'error-image'},start);
+					Logger.info('Invalid Patch File '+filename);
 				}
-				function transferCssComplete(){
-					cleanCssRequest();
-					console.log('loaded '+css[idx].library);
-					css[idx].data = '<style>'+this.responseText+'</style>';
-					if(css[idx].library!='sunny' && css[idx].library!='eggplant' && css[idx].library!='redmond' && css[idx].library!='hot-sneaks'){
-						$('head').append(css[idx].data);
-					}
-					css[idx].fail=0;
-					idx++;
-					if(idx<css.length){
-						loadCss(idx);
-					}
+				function ulog(ht,clean){
+					var u = document.getElementById('ulog');
+					if(clean){u.innerHTML='';}
+					else{u.innerHTML+='<br>'+ht;}
+					Logger.info(ht);
 				}
-				function transferCssFailed(){
-					cleanCssRequest();
-					if(css[idx].fail<3){
-						css[idx].fail++;
-						console.log('retry to load '+css[idx].library);
-						loadCss(idx);
-					}
-					else{
-						console.log('failed to load '+css[idx].library);
-						alert('Failed to load css stylesheet '+css[idx].library+' after 3 attempts');
-						throw 'Failed to load css stylesheet '+css[idx].library;
-					}
-				}
-				css_xhr.open("get", css[idx].url, css[idx].async);
-				css_xhr.send();
-			}
-			loadCss(0);
-			var flog=function(msg,clean){
-				if(clean){
-					var event = document.createEvent('Event');
-					event.initEvent('cleanLogs', false, false);
-					frames['ifrlog'].window.document.dispatchEvent(event);
-				}
-				Logger.info(msg);
-			};
-			var disable_GUI=function(){
-				//$('.preloader').removeClass('ui-helper.hidden');
-				$(".gui-item:not(.ui-state-disabled):not(.gui-disabled)").addClass('ui-state-disabled gui-disabled');
-				$("#tabs").tabs("option","disabled",[0,1,2,3]);
-			};
-			var enable_GUI=function(){
-				//$('.preloader').removeClass('ui-helper.hidden').addClass('ui-helper.hidden');
-				$(".gui-disabled").removeClass('ui-state-disabled gui-disabled');
-				$("#tabs").tabs("enable");
-				$("#tabs").tabs("option","disabled",[3]);
-			};
-			var getLibData = function(){
-				return libraries;
-			};
-			var getCssData = function(){
-				return css;
-			};
-			var switch_style = function(css_title){
-				$('head').find('style').remove();
-				for(var idx=0;idx<css.length;idx++){
-					if(css[idx].library===css_title || (css[idx].library!='sunny' && css[idx].library!='eggplant' && css[idx].library!='redmond' && css[idx].library!='hot-sneaks')){
-						$('head').append(css[idx].data);
-					}
-				}
-				Cookies.set('style', css_title, {domain:'www.ps3xploit.net', expires:30, secure:true, sameSite:'strict'});
-				var event = document.createEvent('Event');
-				event.initEvent('switchStyle', false, false);
-				event.style=css_title;
-				frames['ifrlog'].window.document.dispatchEvent(event);
-				var th = $('#themes');
-				th.children().removeProp('disabled');
-				th.find('option[value="'+css_title+'"]').prop('disabled', true);
-			};
-			function set_style_from_cookie(){
-				var ctitle = Cookies.get('style');
-				if (!ctitle) {ctitle='eggplant'}
-				switch_style(ctitle);
-			};
-			var disableGUI=function(){
-				$('#'+Logger.iptnet()).addClass('ui-state-disabled').on('click',function(){});
-				$('#'+Logger.tbport()).removeClass('ui-state-disabled').addClass('ui-state-disabled');
-				$("#tabs").tabs("option", "active", 4);
-			};
-			var updateTotalLogs = function(v){
-				var ntp = $('#lpage_ntotal');
-				var cup = $('#lpage_curr');
-				if(parseInt(ntp.text())===parseInt(cup.text())){
-					ntp.text(v);
-					cup.text(v);
-				}
-				else{
-					ntp.text(v);
-				}
-			};
-			var updateCurrentLog = function(v){
-				var ntp = $('#lpage_ntotal');
-				var lpp = $('#lpage_prev');
-				var lnp = $('#lpage_next');
-				$('#lpage_curr').text(v);
-				var t = parseInt(ntp.text());
-				if(lpp.button('instance')){
-					if(v===1){
-						lpp.button('disable');
-						if(v===t){
-							lnp.button('disable');
-						}
-					}
-					else if(v>1 && v<t){
-						lpp.button('enable');
-						lnp.button('enable');
-					}
-					else if(v>1 && v===t){
-						lpp.button('enable');
-						lnp.button('disable');
-					}
-				}
-			};
-			var updateErrorDetails = function (dtext,err){
-				$("#ps3details").text(dtext);
-				Logger.error(err);
-				disableGUI();
-
-				$.ajax({
-					url: 'error.php',
-					method: 'POST',
-					data:{
-						error: '402'
-					}
-				}).done(function(data) {
-					data==='OK' ? Logger.info('Session GC complete') : Logger.error('Session GC aborted');
-				}).fail(function() {
-					Logger.error('Session GC failed');
-				});
-
-			}
-
-			var dl_offset=function(obj){
-				return dl_object.buffer.offset;
-			};
-			var updateProgressDialog=function(obj){
-				if(obj)updatePD(obj,dl_object.start);
-			};
-			var validateDownload=function(){
-				ulog('Patch download complete');
-				setTimeout(function(){
-					if(validatePatchFile(dl_object.buffer,dl_object.file)>0){
-						ulog('Patch validation: NG');
-						updateNoValidationGUI(dl_object.buffer,dl_object.start,dl_object.file);
-					}
-					else{
-						ulog('Patch validation: OK');
-						updateValidationGUI(dl_object.start,dl_object.file);
-					}
+				function dl_cancel(){
+					helper.swf.cancelDownload();
 					dl_object=null;
-				},50);
-			};
-			var sound_loaded = function(){
-				//alert('sound_loaded');
-			}
-			var loadSoundAssets = function(){
-				insertSWF('TSound','PS3TSound','PS3TSound');
-			};
-				var complete = function() {
-			Logger.useDefaults();
-			Logger.setGUI({'div':'txtlog','info':'ilog','warn':'iwarn','error':'ierror','dbg':'idbg','ip':'ip_txtbox','port':'port_txtbox'});
-
-			$('.refresh-fm').click(function(){
-				$(document).tooltip('disable');
-				$('.preloader').removeClass('ui-helper-hidden');
-				setTimeout(function(){
-					tabreload('flashmem',toast('Reloading the Flash Memory Manager. Please wait...','warning',120));
-				},100);
-			});
-			$('.refresh-me').click(function(){
-				$(document).tooltip('disable');
-				$('.preloader').removeClass('ui-helper-hidden');
-				setTimeout(function(){
-					tabreload('memedit',toast('Reloading the Userland Memory Editor. Please wait...','warning',120));
-				},100);
-			});
-			$('.refresh-fe').click(function(){
-				$(document).tooltip('disable');
-				$('.preloader').removeClass('ui-helper-hidden');
-				setTimeout(function(){
-					tabreload('fileman',toast('Reloading the File Manager. Please wait...','warning',120));
-				},100);
-			});
-			function tabreload(name,tost){
-				$(name==='memedit' ? '.refresh-me' : name==='fileman' ? '.refresh-fe' : '.refresh-fm').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-				setTimeout(function(){
-					$.ajax({
-						url: name+'.php',
-						method: 'GET'
-					}).done(function(data) {
-						if(data.length===0){Logger.error('Error loading resource file');return;}
-						var o = $('#'+name);
-						var par = o.parent();
-						if(name==='memedit'){
-							$('.ui-spinner-input').off('focus');
-							$('.ui-spinner-up').off('keyUp');
-							$('.ui-spinner-down').off('keyUp');
-							$('.cell-data').off('focusin focusout change');
-							$('#mebox').find('button').off('click');
-							$('#spinner-text').textSpinner('destroy');
-							$('.spinner').remove();
-							$('#xtable').remove();
-							$('#mebox').remove();
-							$('input.cell-data').remove();
-							o.siblings().remove();
-							o.remove();
-							par.children().remove();
-							par.append(data);
-							$('.refresh-fm').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fe').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-me').removeClass('ui-state-disabled');
-						}
-						else if(name==='flashmem'){
-							$('.scbload').find('.mCustomScrollBox').off('mousewheel wheel');
-							$('.scbload').mCustomScrollbar('destroy');
-							$('.scbsave').find('.mCustomScrollBox').off('mousewheel wheel');
-							$('.scbsave').mCustomScrollbar('destroy');
-							$('#fTree').jstree('destroy');
-							$('#dLTree').jstree('destroy');
-							$('#dSTree').jstree('destroy');
-							$('#dSave_As').dialog('destroy');
-							$('#dfmProgress').dialog('destroy');
-							$('#dLoad').dialog('destroy');
-							$('#gfmprogressbar').progressbar('destroy');
-							$('#dprogressbar').progressbar('destroy');
-							$('#accordion').accordion('destroy');
-							$('div[id=dlDialog_Path]').remove();
-							var ipt = $('input[name=sDialog_FileName]');
-							ipt.off('change input');
-							ipt.remove();
-							$('label[id=lsDialog_Path]').remove();
-							$('#ulog').remove();
-							$('#treecontainer').remove();
-							$('#dSave_As').remove();
-							$('#dLoad').remove();
-							$('#dlframe').remove();
-							o.siblings().remove();
-							o.remove();
-							par.children().remove();
-							par.append(data);
-							$('.refresh-me').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fe').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fm').removeClass('ui-state-disabled');
-						}
-						else if(name==='fileman'){
-							$('#jstree_fe1').jstree('destroy');
-							jQuery('#dfeProgress').dialog('destroy');
-							jQuery('#gfeprogressbar').progressbar('destroy');
-							jQuery('#dfeprogressbar').progressbar('destroy');
-							o.siblings().remove();
-							o.remove();
-							par.children().remove();
-							par.append(data);
-							$('.refresh-me').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fm').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fe').removeClass('ui-state-disabled');
-						}
-						$('.preloader').removeClass('ui-helper.hidden').addClass('ui-helper.hidden');
-						$().toastmessage('removeToast', tost);
-						$(document).tooltip('enable');
-					}).fail(function() {
-						$('.preloader').removeClass('ui-helper.hidden').addClass('ui-helper.hidden');
-						$().toastmessage('removeToast', tost);
-						$(document).tooltip('enable');
-						if(name==='memedit'){
-							$('.refresh-fm').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fe').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-me').removeClass('ui-state-disabled');
-							toast('UME refresh failed','error',5);
-						}
-						else if(name==='flashmem'){
-							$('.refresh-me').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fe').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fm').removeClass('ui-state-disabled');
-							toast('FMM refresh failed','error',5);
-						}
-						else if(name==='fileman'){
-							$('.refresh-me').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fm').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fe').removeClass('ui-state-disabled');
-							toast('FM refresh failed','error',5);
-						}
-					});
-				},1000);
-			}
-			function addLogHandler(ipt_id,p_class){
-				$('#'+ipt_id).on('click',function(){
-					var event = document.createEvent('Event');
-					event.toggle = this.checked;
-					switch(p_class){
-						case 'log-warning':
-							event.initEvent('toggleWarnings', false, false) ;
-							break;
-						case 'log-error':
-							event.initEvent('toggleErrors', false, false) ;
-							break;
-						case 'log-debug':
-							event.initEvent('toggleDebugs', false, false) ;
-							break;
-						case 'log-info':
-							event.initEvent('toggleLogs', false, false) ;
-							break;
-						default:
-							return;
-					}
-					frames['ifrlog'].window.document.dispatchEvent(event);
-				});
-			}
-			addLogHandler(Logger.iptlog(),'log-info');
-			addLogHandler(Logger.iptwrn(),'log-warning');
-			addLogHandler(Logger.ipterr(),'log-error');
-			addLogHandler(Logger.iptdbg(),'log-debug');
-			function inIframe() {
-				try {return window.self !== window.top;} catch (e) {return true;}
-			}
-			if(!window.jQuery){
-				location.reload();
-				return;
-			}
-			else if(inIframe()){
-				window.top.location.replace(window.self.location.href );
-				return;
-			}
-
-			$('FPX2').removeClass('ui-helper-hidden').addClass('ui-helper-hidden');
-			$('.logoptions').find('input[type=checkbox]').checkboxradio();
-			$('#'+Logger.iptnet()).parent().children('label').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-			$('#port_txtbox').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-			$('#BodyID').removeClass('ui-helper-hidden').addClass('ui-widget').css('visibility','visible').css('overflow','auto');
-			//$('TSound').removeClass('ui-helper-hidden').addClass('ui-helper-hidden');
-			//$('#tabs').removeClass('ui-helper-hidden');
-			$('#title').removeClass('ui-helper-hidden');
-			$('#intro-accordion').accordion({
-				heightStyle: 'fill',
-				event: 'mouseover',
-				active:4
-			});
-			$('#lpage_prev').button();
-			$('#lpage_next').button();
-			$('#lilog').tooltip({classes: {'ui-tooltip-content': 'log-info'}});
-			$('#liwarn').tooltip({classes: {'ui-tooltip-content': 'log-warning'}});
-			$('#lierror').tooltip({classes: {'ui-tooltip-content': 'log-error'}});
-			$('#lidbg').tooltip({classes: {'ui-tooltip-content': 'log-debug'}});
-			$('.logbtn').on('click',function(){
-				$(this).tooltip( 'close' );
-			});
-			$(document).tooltip();
-			if (navigator.plugins.length>0) {
-				$.ajaxSetup({
-					cache: false,
-					headers: {'X-Client-Type':btoa(navigator.plugins[0].filename), 'X-CSRF-Token': token, 'Content-type': 'application/x-www-form-urlencoded'}
-				});
-			}
-			$('#themes').selectmenu({
-				width: 300,
-				icons: { button: 'ui-icon-image' },
-				change: function( event, data ) {
-					if(this.selectedIndex!==0){
-						switch_style(this.value);
-						Logger.info('CSS: Applied '+this[this.selectedIndex].innerText+' Theme');
-						this.selectedIndex=0;
-						$(this).selectmenu('refresh');
-					}
+					helper.sp.playNG();
 				}
-			});
-			var reloads=0;
-			//$( '#tabs' ).tabs({
-			$('#tabs').removeClass('ui-helper-hidden').tabs({
-				heightStyle: 'auto',
-				disabled: [1,2,3],//
-				create: function( event, ui ){
-					var cdate = new Date();
-					if(get_day()!== cdate.getUTCDay().toString() || get_year() !== cdate.getUTCFullYear().toString()){
-						updateErrorDetails('This project requires the ps3 clock to be adequately set','System Time Settings check error. Please adjust your system\'s clock.');
-						return;
+				var so =null;
+				jQuery('.preloader').removeClass('ui-helper-hidden');
+				jQuery('#admode').switchButton({
+					labels_placement: 'left',
+					//checked: true,
+					clear: false,
+					on_label: 'FMM Strict Mode ON ',
+					off_label: 'FMM Strict Mode OFF',
+					on_callback: function (){
+						jQuery(document).tooltip('disable');
+						helper.fm_usermode = 0;
+						jQuery(document).tooltip('enable');
+					},
+					off_callback: function(){
+						jQuery(document).tooltip('disable');
+						function confirmMode(){
+							helper.fm_usermode = 1;
+							jQuery(document).tooltip('enable');
+						}
+						confirmDialog('YOU SHOULD NEVER TURN FMM Strict Mode OFF!!!<br><br>Only advanced users & developers should ever consider using FMM with strict mode off.You have been warned.','Are you sure you want to continue?',confirmMode,null,function(ck){jQuery('#admode').switchButton('option','checked', ck);jQuery(document).tooltip('enable');},true);
 					}
-					else{
-						$.ajax({
-							url: 'file3.php',
-							method: 'POST',
-							data:{
-								file: 'biginteger.pmin.js'
+				});
+				
+				var sDialog = function(_name){
+					var sdef = null;
+					var jQtree = jQuery('#dSTree');
+					var jQpt_fname = jQuery('input[name=sDialog_FileName]');
+					var jQlbl_fname = jQuery('label[id=lsDialog_Path]');
+					var fname = _name ? _name : 'dump.hex';
+					var sel_path = '';
+					var jQftree=null;
+					var sd = this;
+					var sobj = {
+						'sector_count': 0x77800, //nand:  0x78000 - nor: 0x8000
+						'nsec_iter': 0x8000,//nand 0x8000 (16Mb) - nor: 0x2000 (4Mb)
+						'dump_start': 0,
+						'save_offset': 0,
+						'file_path': '/dev_hdd0/dump.hex',
+						'default_name': 'dump.hex',
+						'buffer': null
+					};
+					var dialogButtons = [{text: 'Save', icon: 'ui-icon-disk', click: function(event, ui){
+						if(sobj.sector_count){
+							sobj.file_path = jQlbl_fname[0].innerText;
+							function confirmDump(){
+								jQdialog.dialog('close');
+								jQuery('.preloader').removeClass('ui-helper-hidden');
+								ldiag.removePatch();
+								setTimeout(function() {
+									sobj.buffer = helper.sm.getBuffer();
+									sobj.tls = helper.worker['fmm'].getTLS();
+									if(!sobj.buffer){Logger.error('saveDump: Buffer memory allocation failed!');toast('Buffer memory allocation failed','error',5);return;}
+									if(!sobj.tls){Logger.error('saveDump: TLS memory allocation failed!');toast('TLS memory allocation failed','error',5);return;}
+									pbfm1.setTitle('Dumping Operations Progress');
+									pbfm1.open();
+									setTimeout(function() {
+										sdef.resolve(sobj);
+									},1200);
+								},1000);
 							}
-						}).done(function(data) {
-							if(data.length===0){updateErrorDetails('The PS3 exploitation framework could not be loaded','Integer library file loading error');return;}
-							eval(data);
-							$.ajax({
-								url: 'file3.php',
-								method: 'POST',
-								data:{
-									file: 'framework.pmin.js'
-								}
-							}).done(function(data) {
-								if(data.length===0){updateErrorDetails('The PS3 exploitation framework could not be loaded','Exploitation framework library file loading error');return;}
-								eval(data);
-								if(jsleak32(0x10000)!==0x7F454C46){
-									updateErrorDetails('The console is not a CEX/DEX PS3 model','Incompatible console detected');
-									return;
-								}
-								var fpwait = 0;
-								function compload(){
-									fpwait++;
-									if(fp9loaded===false){
-										if(fpwait<16){
-											if(fpwait===1){Logger.warn('Waiting for the PS3 Flash Player 9 plugin...');}
-											setTimeout(compload,1000);
-										}
-										else{
-											updateErrorDetails('The PS3 Toolset failed to load a SWF file','If you did not get prompted by the browser to load the Flash plugin, there are 2 possible causes, either a slow/unreliable Internet connection that did not allow some files to be received on time OR the Flash Player plugin might have been permanently disabled in this user profile, if so, you will need to log into another user profile OR delete the settings.xml file in the current profile webbrowser folder if you are on CFW/HEN.');
-											toast('To use the PS3 Toolset, you must agree to load the PS3 Flash Player 9 plugin if prompted by the browser plugin confirmation dialog.<br/>Please check the logs for more information.','warning',7);
-											setTimeout(function(){
-												setTimeout(function(){
-													$('#dg-confirm').parent().find('.ui-dialog-buttonpane').find('button:last').focus();
-												},750);
-												confirmDialog('The PS3 Toolset will now attempt to reload. Do you want to continue?','Toolset Refresh',function(){location.reload();});
-											},5200);
-										}
-										return;
-									}
-									else if(navigator.plugins.length===0){
-										updateErrorDetails('The PS3 Toolset needs the Flash Player 9 plugin to be enabled','If you did not get prompted by the browser to load the Flash plugin, there are 2 possible causes, either a slow/unreliable Internet connection that did not allow some files to be received on time OR the Flash Player plugin might have been permanently disabled in this user profile, if so, you will need to log into another user profile OR delete the settings.xml file in the current profile webbrowser folder if you are on CFW/HEN.');
-										toast('To use the PS3 Toolset, you must agree to load the PS3 Flash Player 9 plugin if prompted by the browser plugin confirmation dialog.<br/>Please check the logs for more information.','warning',7);
-										return;
-									}
-									else{
-										document.getElementById('FP9Test').swfloader();
-									}
-								}
-								setTimeout(compload,1000);
-							}).fail(function(data) {
-								updateErrorDetails('The PS3 exploitation framework download failed','Exploitation framework library file downloading error');
-							});
-						}).fail(function(data) {
-							updateErrorDetails('The PS3 exploitation framework download failed','Integer library file downloading error');
-						});
-					}
-				},
-				beforeActivate: function(event, ui) {
-					var id = ui.newPanel[0].id;
-					if (id==='tblog') {
-						var event = document.createEvent('Event');
-						event.initEvent('showLog', false, false);
-						frames['ifrlog'].window.document.dispatchEvent(event);
-					}
-					if (id==='toolset' || id==='tblog') {
-						$('.refresh-me').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-						$('.refresh-fm').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-						$('.refresh-fe').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-					}
-					else{
-						disable_GUI();
-					}
-				},
-				activate: function(event, ui) {
-					//var found=false;
-					$.each(ui.newPanel[0].children,function(idx,el){
-						var ret = true;
-						if (el.id==='memedit') {
-							$('.refresh-fm').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fe').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$(el).trigger('refreshEvent',[toast('Refreshing data','warning',4)]);
-							//found=true;
-							ret = false;
-						}
-						else if (el.id==='flashmem') {
-							$('.refresh-me').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fe').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-fm').removeClass('ui-state-disabled');//now enabled by flashmem itself
-							enable_GUI();
-							//found=true;
-							ret = false;
-						}
-						else if (el.id==='fileman') {
-							$('.refresh-fm').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							$('.refresh-me').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-							//$('.refresh-fe').removeClass('ui-state-disabled');//now enabled by flashmem itself
-							$(el).trigger('refreshEvent',[toast('Refreshing data','warning',4)]);
-							//found=true;
-							ret = false;
-						}
-						return ret;
-					});
-				},
-				beforeLoad: function(event, ui) {
-					if (ui.tab.data('loaded')) {
-						event.preventDefault();
-					}
-					else{
-						if (navigator.plugins.length>0 && token.length>0) {
-							ui.ajaxSettings.headers= {'X-Client-Type':btoa(navigator.plugins[0].filename), 'X-CSRF-Token': token};
-							ui.ajaxSettings.method='POST';
-						}
-						// Ugly hack to insert the loading progress bar gif animation & ensure it is visible
-						// Cannot use  CSS for this because base64 images break ssl on ps3 browser & url method does not load quick enough
-						var img = new Image();
-						img.width=128;
-						img.height=15;
-						var cstyle = Cookies.get('style');
-						img.src = cstyle==='eggplant' ? 'assets/jqueryui/eggplant/images/loading_bar_purple.gif':
-								cstyle==='hot-sneaks' ? 'assets/jqueryui/hot-sneaks/images/loading_bar_darkblue.gif':
-								cstyle==='redmond' ? 'assets/jqueryui/redmond/images/loading_bar_blue.gif':
-								'assets/jqueryui/sunny/images/loading_bar_darkbrown.gif';
-						$('.ui-tabs-anchor').addClass('ui-state-disabled');
-						ui.panel.html('<div class=\'container-loading-bar\'><table><tbody><tr><td><div align=\'center\' class=\'min-width-200 pad-bottom-10px\'><b>Downloading tool, please wait...</b></div></td></tr><tr><td><div class=\'loading-bar\'></div></td></tr></tbody></table></div>');
-						$('.loading-bar').append(img);
-						ui.jqXHR.fail(function() {
-							if(reloads<3){
-								ui.panel.html('<div class=\'container-loading-bar\'><table><tbody><tr><td><div align=\'center\' class=\'min-width-200 pad-bottom-10px\'><b>Downloading error. Attempting to reload tool, please wait...</b></div></td></tr><tr><td><div class=\'loading-bar\'></div></td></tr></tbody></table></div>');
-								$( '#tabs' ).tabs( 'load',$( '#tabs' ).tabs( 'option', 'active' ));
+							if(fsitem_exists(sobj.file_path)){
+								confirmDialog('If you continue, '+sobj.file_path+' will be overwritten','Confirm',confirmDump);
 							}
 							else{
-								ui.panel.html('<div class=\'container-loading-bar\'><table><tbody><tr><td><div align=\'center\' class=\'min-width-200 pad-bottom-10px\'><b>Tool could not be downloaded</b></div></td></tr><tr><td><div class=\'loading-error\'></div></td></tr></tbody></table></div>');
-								$('.ui-tabs-anchor').removeClass('ui-state-disabled');
+								confirmDump();
 							}
+						}
+						else if(sobj.idps){
+							//alert(sobj.idps);
+							jQdialog.dialog('close');
+							sobj.file_path = jQlbl_fname[0].innerText;
+							function confirmSave(){
+								setTimeout(function() {
+								sdef.resolve(sobj);
+							},250);
+							}
+							if(fsitem_exists(sobj.file_path)){
+								confirmDialog('If you continue, '+sobj.file_path+' will be overwritten','Confirm',confirmSave);
+							}
+							else{
+								confirmSave();
+							}
+						}
+					}},{text: 'Cancel', icon: 'ui-icon-close', click: function(event, ui){
+						jQdialog.dialog('close');
+					}}];//
+					jQuery('#dSave_As').removeClass('ui-helper-hidden');
+					
+					var jQdialog = jQuery('#dSave_As').dialog({
+						autoOpen: false,
+						modal: true,
+						closeOnEscape: false,
+						resizable: false,
+						height: 480,
+						width: 720,
+						buttons: dialogButtons,
+						open: function(event, ui ) {
+							jQftree = jQuery('#fTree').jstree(true);
+							jQpt_fname = jQuery('input[name=sDialog_FileName]');
+							jQlbl_fname = jQuery('label[id=lsDialog_Path]');
+							jQlbl_fname.html('');
+							jQpt_fname.val(fname);
+							jQtree.jstree({
+								'core' : {
+									'multiple':false,
+									'restore_focus':false,
+									'dblclick_toggle':false,
+									'data' : function (node, cb) {
+										if(node.type!=='file'){
+											jQtree.find('i.jstree-ocl').addClass('ui-state-disabled');
+											var dat = getJSTreeData_fast(this, node, false, true);
+											//var dat = getJSTreeData_wk(this, node, false, true);
+											cb(dat===-1? [] : dat);
+											if(dat===-1 || dat.length>0){
+												jQtree.find('i.jstree-ocl').removeClass('ui-state-disabled');
+												this.get_node(node, true).removeClass('jstree-loading').attr('aria-busy',false);
+											}
+										}
+									}
+								},
+								'themes':{
+									'dots': true,
+									'icons': true
+								},
+								'sort' : function(a, b) {
+									return (this.get_node(a).text > this.get_node(b).text) ? 1 : -1;
+								},
+								'types' : {
+									'#' : {
+									  'max_children' : 12,
+									  'max_depth' : 128,
+									  'valid_children' : ['root']
+									},
+									'root' : {
+									  'max_depth' : 127,
+									  'icon' : 'jstree-folder',
+									  'valid_children' : ['folder','file']
+									},
+									'folder' : {
+									  'icon' : 'jstree-folder',
+									  'valid_children' : ['folder','file']
+									},
+									'file' : {
+									  'icon' : 'jstree-file',
+									  'valid_children' : []
+									}
+								  },
+								'plugins' : [
+									'search', 'types', 'changed', 'unique', 'sort'//, 'wholerow'
+								]
+							});
+							jQtree.on('select_node.jstree', function (e, data) {
+								var _path = data.instance.get_fullpath(data.node);
+								if(data.node.type === 'file'){
+									jQlbl_fname.text(_path);
+									jQpt_fname.val(data.node.text);
+								}
+								else{
+									if(jQpt_fname.val().length===0){jQpt_fname.val('dump.hex');}
+									jQlbl_fname.text(_path+'/'+jQpt_fname.val());
+								}
+								sel_path = _path.substr(_path.lastIndexOf('/'));
+								sd.enableSaveButton();
+								sd.enableSaveText();
+							});
+							jQpt_fname.on('change',function(e){
+								var v = jQpt_fname.val();
+								if(validateFileName(v)){
+									jQlbl_fname.text(sel_path+'/');
+									sd.disableSaveButton();
+								}
+								else if(sel_path.length>0){
+									jQlbl_fname.text(sel_path+'/'+v);
+									sd.enableSaveButton();
+								}
+								else{
+									jQlbl_fname.text('Please select a destination folder');
+									sd.disableSaveText();
+									sd.disableSaveButton();
+								}
+								change = false;
+							});
+							var change = false;
+							jQpt_fname.on('input',function(e){
+								change = true;
+							});
+							jQtree.parent().on('click', function (e) {
+								if(change===true){jQtree.parent().focus();}
+							});
+							jQtree.on('click', function (e) {
+								if(change===true){jQtree.focus();}
+							});
+							jQtree.on('after_open.jstree', function (e,data) {
+								jQtree.find('i.jstree-ocl').removeClass('ui-state-disabled');
+								data.instance.get_node(data.node, true).removeClass('jstree-loading').attr('aria-busy',false);
+							});
+							jQtree.on('load_node.jstree', function (e,data) {
+								data.instance.get_node(data.node, true).addClass('jstree-loading').attr('aria-busy',true);
+								data.instance.open_node(data.node);
+							});
+							jQtree.on('before_open.jstree', function (e, data) {
+								data.instance.get_node(data.node, true).addClass('jstree-loading').attr('aria-busy',true);
+								
+								var nodes_to_close = jQuery.grep(data.instance.get_node(data.node.parent).children, function(elem,index) {
+									return elem!==data.node ? data.instance.is_open(elem) : false;
+								});
+								data.instance.close_node(nodes_to_close);
+							});
+						},
+						beforeClose: function(event, ui ) {
+						},
+						close: function(event, ui ) {
+							jQpt_fname.val(fname);
+							jQtree.jstree('destroy',true);
+						}
+					});
+					this.setTitle = function(txt){
+						jQdialog.dialog('option', 'title', txt );
+					};
+					this.open = function(obj,func){
+						sobj = obj ? obj : sobj;
+						if(sobj.default_name){
+							fname = sobj.default_name ? sobj.default_name : 'dump.hex';
+						}
+						jQdialog.dialog('open');
+						jQuery('.scbsave').mCustomScrollbar({
+							theme: (Cookies.get('style')==='eggplant') ? 'light-thick' : 'dark-thick'
 						});
-						ui.jqXHR.success(function() {
-							ui.tab.data( 'loaded', true );
-							reloads=0;
-							if (ui.ajaxSettings.url.indexOf('memedit.php')>=0) {
-								$('.refresh-fm').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-								$('.refresh-fe').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-								$('.refresh-me').removeClass('ui-state-disabled');
-							}
-							else if (ui.ajaxSettings.url.indexOf('flashmem.php')>=0) {
-								$('.refresh-me').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-								$('.refresh-fe').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-								$('.refresh-fm').removeClass('ui-state-disabled');
-							}
-							else if (ui.ajaxSettings.url.indexOf('fileman.php')>=0) {
-								$('.refresh-fm').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-								$('.refresh-me').removeClass('ui-state-disabled').addClass('ui-state-disabled');
-								$('.refresh-fe').removeClass('ui-state-disabled');
-							}
-							$('.ui-tabs-anchor').removeClass('ui-state-disabled');
+						this.disableSaveButton();
+						this.disableSaveText();
+						jQlbl_fname.text('Please select a destination folder');
+						sdef = jQuery.Deferred();
+						sdef.promise().done(func);
+						jQtree.focus();
+						jQuery('#dSave_As').parent().find('button').blur();
+						jQuery('#dSave_As').parent().find('.ui-dialog-titlebar-close').prop('title','');
+						jQuery(document).tooltip();
+					};
+					this.close = function(){
+						jQdialog.dialog('close');
+						jQuery('.scbsave').find('.mCustomScrollBox').off('mousewheel wheel');
+						jQuery('.scbsave').mCustomScrollbar('destroy');
+						//TO-DO:
+						//Reset dialog features...
+					};
+					this.enableSaveText = function(){
+						jQuery('#sDialog_FileName').removeClass('ui-state-disabled');
+					};
+					this.disableSaveText = function(){
+						jQuery('#sDialog_FileName').removeClass('ui-state-disabled').addClass('ui-state-disabled');
+					};
+					this.disableSaveButton= function(){
+						jQuery('#dSave_As').parent().find('div.ui-dialog-buttonset:first').children('button:first').removeClass('ui-state-disabled').addClass('ui-state-disabled').blur();
+					};
+					this.enableSaveButton= function(){
+						jQuery('#dSave_As').parent().find('div.ui-dialog-buttonset:first').children('button:first').removeClass('ui-state-disabled').focus().blur();
+					};
+				};
+				var lDialog = function(){
+					var jQtree = jQuery('#dLTree');
+					var jQpath = jQuery('div[id=dlDialog_Path]');
+					var lrosFile=null;
+					var ld = this;
+					var sha256_ros = '';
+					var buf_po = null;
+					var dialogButtons = [
+						{text: 'Load', icon: 'ui-icon-folder-open', click: function(event, ui){
+							jQdialog.dialog('close');
+							var idx = jQpath[0].innerText.lastIndexOf('/');
+							var filename = jQpath[0].innerText.substr(idx+1,jQpath.text().length-idx-1);
+							var start = new Date();
+							ulog(start,true);
+							pbfm1.open();
+							pbfm1.updateProgressDialog({'dlabel':'Preparing buffer','glabel':'Loading \''+filename+'\'','dvalue':0,'gvalue':0,'title':'Loading Operations Progress'});
+							setTimeout(function(){
+								var jQftree = jQuery('#fTree').jstree(true);
+								ldiag.removePatch();
+								sha256_ros = '';
+								buf_po = helper.sm.getBuffer();
+								if(!buf_po){Logger.error('loadPatch: Buffer memory allocation failed!');toast('Buffer memory allocation failed','error',5);return;}
+								lrosFile = new fileObject(jQpath.text());
+								ulog('Opened File '+jQpath.text());
+								ulog('Size: 0x'+lrosFile.size.toString(16));
+								if(lrosFile.size===helper.patchfile_size){
+									ulog('File Size Check: OK');
+									pbfm1.updateProgressDialog({'dlabel':'Reading file data','gvalue':0},start);
+									setTimeout(function(){
+										Logger.info('loadPatch: loading file '+jQpath.text());
+										var err = lrosFile.load(helper.patchfile_size,{'offset':buf_po.offset+0x30,'size':helper.patchfile_size});
+										if(err===0){
+											ulog('File loaded successfully');
+											pbfm1.updateProgressDialog({'dlabel':'SHA256 Extraction','glabel':'Validating \''+filename+'\'','dvalue':100,'gvalue':75},start);
+											//setTimeout(function(){
+											if(validatePatchFile(buf_po,filename)===1){
+												var tsttxt = 'The loaded file is a custom patch file. Applying it on this console without a hardware flasher for emergencies is risky & unwise.';
+												if(!helper.fm_usermode){
+													toast(tsttxt+' You cannot use it in Strict Mode.','warning',10);
+													ulog(tsttxt+'<br>You cannot use it in Strict Mode.');
+													updateNoValidationGUI(buf_po,start,filename);
+													closure();
+													return;
+												}
+												else{
+													toast(tsttxt,'warning',5);
+													ulog('Patch file type: Custom<br>Using this file to patch the console is risky<br>You should consider your next steps carefully.');
+												}
+											}
+											else{
+												if(helper.kmode==='CEX'){
+													toast('The loaded file is the recommended patch file for use on this console with the current firmware version','success',5);
+													ulog('Patch file type: Official CEX');
+												}
+												else{
+													toast('The loaded file is the recommended patch file for CEX mode only. This console is in ('+helper.kmode+') mode, using this patch will brick it.','warning',10);
+													ulog('Patch file type: Official CEX - NOT compatible with the current mode ('+helper.kmode+') of this console');
+												}
+											}
+											updateValidationGUI(start,filename);
+											closure();
+											//},500);
+										}
+										else {
+											ulog('File IO error: 0x'+err.toString(16)+'<br>Loading operations aborted');
+											updateNoValidationGUI(buf_po,start,filename);
+											closure();
+										}
+									},500);
+								}
+								else {
+									helper.sp.playNG();
+									pbfm1.updateProgressDialog({'dlabel':'Loading Operations failed','glabel':jQpath.text()+' is not a valid patch file','dvalue':100,'gvalue':100,'istatus':'error-image'},start);
+									ulog('File Size Check: NG<br>Loading operations aborted');
+									Logger.info('loadPatch: Invalid File '+jQpath.text());
+									closure();
+								}
+								function closure(){
+									err = lrosFile.close();
+									delete lrosFile;
+								}
+							},1200);
+						}},
+						{text: 'Cancel', icon: 'ui-icon-close', click: function(event, ui){
+							jQdialog.dialog('close');
+						}}];//
+					jQuery('#dLoad').removeClass('ui-helper-hidden');
+					var jQdialog = jQuery('#dLoad').dialog({
+						autoOpen: false,
+						modal: true,
+						closeOnEscape: false,
+						resizable: false,
+						height: 480,
+						width: 720,
+						buttons: dialogButtons,
+						open: function(event, ui ) {
+							jQtree.jstree({
+								'core' : {
+									'multiple':false,
+									'restore_focus':false,
+									'dblclick_toggle':false,
+									'data' : function (node, cb) {
+										jQtree.find('i.jstree-ocl').addClass('ui-state-disabled');
+										var dat = getJSTreeData_fast(this, node, true, false);
+										//var dat = getJSTreeData_wk(this, node, true, false);
+										cb(dat===-1? [] : dat);
+										if(dat===-1 || dat.length>0){
+											jQtree.find('i.jstree-ocl').removeClass('ui-state-disabled');
+											this.get_node(node, true).removeClass('jstree-loading').attr('aria-busy',false);
+										}
+									}
+								},
+								'themes':{
+									'dots': true,
+									'icons': true
+								},
+								'sort' : function(a, b) {
+									var a1 = this.get_node(a);
+									var b1 = this.get_node(b);
+									if (a1.type == b1.type){
+										return (a1.text > b1.text) ? 1 : -1;
+									} else {
+										return (a1.type < b1.type) ? 1 : -1;
+									}
+								},
+								'types' : {
+									'#' : {
+									  'max_children' : 12,
+									  'max_depth' : 128,
+									  'valid_children' : ['root']
+									},
+									'root' : {
+									  'max_depth' : 127,
+									  'icon' : 'jstree-folder',
+									  'valid_children' : ['folder','file']
+									},
+									'folder' : {
+									  'icon' : 'jstree-folder',
+									  'valid_children' : ['folder','file']
+									},
+									'file' : {
+									  'icon' : 'jstree-file',
+									  'valid_children' : 'none',
+									  'max_children' : 0
+									}
+								  },
+								'conditionalselect' : function (node, event) {
+									if(node.type === 'file'){return true;}
+									else {return false;}
+								  },
+								'plugins' : [
+									'search', 'types', 'changed', 'unique', 'sort', 'conditionalselect'//,
+								]
+							});
+							jQtree.on('activate_node.jstree', function (e, data) {
+								jQpath.text(data.instance.get_fullpath(data.node));
+								ld.enableLoadButton();
+							});
+							jQtree.on('load_node.jstree', function (e,data) {
+								data.instance.get_node(data.node, true).addClass('jstree-loading').attr('aria-busy',true);
+								data.instance.open_node(data.node);
+							});
+							jQtree.on('before_open.jstree', function (e, data) {
+								data.instance.get_node(data.node, true).addClass('jstree-loading').attr('aria-busy',true);
+								var nodes_to_close = jQuery.grep(data.instance.get_node(data.node.parent).children, function(elem,index) {
+									return elem!==data.node ? data.instance.is_open(elem) : false;
+								});
+								data.instance.close_node(nodes_to_close);
+							});
+							jQtree.on('after_open.jstree', function (e,data) {
+								jQtree.find('i.jstree-ocl').removeClass('ui-state-disabled');
+								data.instance.get_node(data.node, true).removeClass('jstree-loading').attr('aria-busy',false);
+							});
+						},
+						beforeClose: function(event, ui ) {
+						},
+						close: function(event, ui ) {
+							jQtree.jstree('destroy',true);
+						}
+					});
+					this.setTitle = function(txt){
+						jQdialog.dialog( 'option', 'title', txt );
+					};
+					this.open = function(){
+						jQdialog.dialog( 'open');
+						jQuery('.scbload').mCustomScrollbar({
+							theme: (Cookies.get('style')==='eggplant') ? 'light-thick' : 'dark-thick'
 						});
-						reloads++;
+						jQpath.text('*.*');
+						this.disableLoadButton();
+						jQuery('#dLoad').parent().find('.ui-dialog-titlebar-close').prop('title','');
+						jQuery(document).tooltip();
+					};
+					this.close = function(){
+						jQdialog.dialog('close');
+						jQuery('.scbload').find('.mCustomScrollBox').off('mousewheel wheel');
+						jQuery('.scbload').mCustomScrollbar('destroy');
+					};
+					this.getSHA256 = function (){
+						return sha256_ros;
+					};
+					this.getBuffer = function(){
+						return buf_po;
+					};
+					this.addPatchInfo = function(buf,sha){
+						buf_po=buf;
+						sha256_ros=sha;
+					};
+					this.removePatch = function(){
+						var jQftree = jQuery('#fTree').jstree(true);
+						var _node = jQftree.get_node('flashbk');
+						var children = _node ? _node.children : [];
+						if(children.length>0){
+							jQftree.delete_node(children);
+						}
+						buf_po={'offset':0,'size':0};
+					};
+					this.disableLoadButton= function(){
+						jQuery('#dLoad').parent().find('div.ui-dialog-buttonset:first').children('button:first').removeClass('ui-state-disabled').addClass('ui-state-disabled').blur();
+					};
+					this.enableLoadButton= function(){
+						jQuery('#dLoad').parent().find('div.ui-dialog-buttonset:first').children('button:first').removeClass('ui-state-disabled').focus().blur();
+					};
+				};
+				var fTree = function(close_toast){
+					var jQtree = jQuery('.fm-tree');
+					so = so ? so : new storageObject();
+					helper.minver = getMinVer();
+					var cfwminver = parseFloat(helper.minver)<3.60;
+					var metldr = getMtldrVersion(so);
+					function metldr_err(){
+						Logger.error('The minimum applicable firmware version does not match the metldr version');
+						Logger.warn('If the IDPS of your console is spoofed, the minimum applicable firmware version calculated by the system is no longer reliable');
+						toast('A discrepancy possibly caused by IDPS spoofing was detected in the minimum applicable firmware version returned by the system.','warning',5);
+						helper.minver += ' !';
 					}
-				},
-				show: { effect: 'fadeIn', duration: 800, easing:'swing' }
-			});
-			set_style_from_cookie();
-					$('#lpage_prev').button({
-				icon: 'ui-icon-seek-prev',
-				disabled: true
-			});
-			$('#lpage_prev').on('click',function(){
-				var event = document.createEvent('Event');
-				event.initEvent('prevPage', false, false);
-				event.page = parseInt($('#lpage_curr').text())-2;
-				frames['ifrlog'].window.document.dispatchEvent(event);
-				$('#lpage_next').button('enable');
-			});
-			$('#lpage_next').button({
-				icon: 'ui-icon-seek-next',
-				disabled: true
-			});
-			$('#lpage_next').on('click',function(){
-				var event = document.createEvent('Event');
-				event.initEvent('nextPage', false, false);
-				event.page = parseInt($('#lpage_curr').text());
-				frames['ifrlog'].window.document.dispatchEvent(event);
-				$('#lpage_prev').button('enable');
-			});
-			window.scrollTo(0,0);
-		};
-		</script>
-		<link type="text/css" rel="stylesheet" href="assets/css/gfont.css">
-		<link type="text/css" rel="stylesheet" href="assets/css/fork-awesome.min.css">
-	</head>
-	<body id="BodyID" class="ui-helper-hidden" style="overflow: hidden;height:auto;visibility:hidden;">
-		<div class="preloader ui-helper-hidden"><div class="container-busy-icon"><div class="busy-icon"></div></div></div>
-			<div id="title" class="ui-helper-hidden main-title ui-widget-header ui-corner-all">
-				<h1>PlayStation 3 Toolset <span class='header-small-text'>by @bguerville</span></h1>
-				<h4 id='ps3details' class="ps3-details">Initializing PS3 Toolset v1.1 <span class='header-small-text'>build 003</span><br/>Please Wait</h4>
-				<form action="#">
-					<select id="themes" >
-						<option value="dummy" disabled selected>Change Theme</option>
-						<option value="sunny" >Sunny</option>
-						<option value="eggplant" disabled>Eggplant</option>
-						<option value="hot-sneaks">Hot Sneaks</option>
-						<option value="redmond">Redmond</option>
-					</select>
-				</form>
-			</div>
-			<div id="tabs" class='ui-helper-hidden main-tabs ' style='height:780px;min-height:780px;'>
-				<ul>
-					<li><a href='#toolset'><i class="fa fa-home fa-fw"></i> Home</a></li>
-					<li><a href='memedit.php'><i class="fa fa-table fa-fw"></i> Memory Editor<span title='Refresh Memory Editor Tab' class='refresh fa fa-refresh ui-state-disabled refresh-me pointer tab-icon'></span></a></li>
-					<li><a href='flashmem.php'><i class="fa fa-microchip fa-fw"></i> Flash Memory Manager<span title='Refresh Flash Memory Manager Tab' class='refresh fa fa-refresh ui-state-disabled refresh-fm pointer tab-icon'></span></a></li>
-					<li><a href='fileman.php'><i class="fa fa-table fa-hdd-o"></i> File Manager (soon)<span title='Refresh File Manager Tab' class='refresh fa fa-refresh ui-state-disabled refresh-fe pointer tab-icon'></span></a></li>
-					<li><a href='#tblog'><i class="fa fa-list-alt fa-fw"></i> Logs</a></li>
-				</ul>
-				<div id="toolset">
-					<h2 align='right' class='tab-header'>PS3 Toolset <span class='header-tiny-text'>v1.1.003</span></h2>
-					<div class='intro-table'>
-						<div class='box-table' style="max-height:620px;min-height:600px;height:620px;">
-							<div class='box-cell-30 '>
-								<table class="window-250">
-									<tbody class="window-250">
-										<tr class="window-header ui-widget-header">
-											<th class="logoptions window-header ui-widget-header">
-												<div class="nopad">
-													<span class="fa-stack fa-fw" style="font-size:12px;">
-														<i class="fa fa-square-o fa-stack-2x fa-fw"></i>
-														<i class="fa fa-commenting-o fa-stack-1x fa-fw" style="font-size:8px;"></i>
-													</span>
-													<span class='top2px baloo-header'> Welcome</span>
-												</div>
-											</th>
-										</tr>
-										<tr class="logoptions window-content-top ui-widget-content">
-											<td id='intr' align="justify" class="window-content-top">
-												<div class='sizer'>
-													<i class="fa fa-border fa-quote-left fa-pull-left fa-fw" style="font-size:10px;"></i>
-													The PS3 Toolset is a repository project for tools built upon my latest ps3 exploitation framework v4.1.<br/>
-													New tools & features should be added to this repository with time.<br/>
-													I hope you enjoy using them as much as I enjoy making them.
-													<i class="fa fa-border fa-quote-right fa-pull-right fa-fw" style="font-size:10px;"></i>
-													<br/>
-													<div class='pad-sig align-right'>@bguerville</div>
-												</div>
-											</td>
-										</tr>
-										<tr class="pl window-bottom-small">
-											<td align="justify" class="window-bottom-small">
-												<div class='sizer height-5px'>XXX</div>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-								<br/><br/><br/>
-								<table class="window-250">
-									<tbody class="window-250">
-										<tr class="window-header ui-widget-header">
-											<th class="logoptions window-header ui-widget-header">
-												<div class="nopad">
-													<span class="fa-stack fa-fw" style="font-size:12px;">
-														<i class="fa fa-square-o fa-stack-2x fa-fw"></i>
-														<i class="fa fa-exclamation-triangle fa-stack-1x fa-fw" style="font-size:8px;"></i>
-													</span>
-													<span class='top2px baloo-header'> Privacy</span>
-												</div>
-											</th>
-										</tr>
-										<tr class="logoptions window-content-top ui-widget-content">
-											<td id='security' align="justify" class="window-content-top">
-												<div class='sizer'>
-													This website does not collect or store any information of personal or technical nature related to you or your console.<br/>
-													No data from your console ever gets transmitted to our web server when using the PS3 Toolset tools, all operations are conducted locally.<br/>
-													Cookies are used locally on the ps3 for persisting a handful of PS3 Toolset variables from one session to the next.
-												</div>
-											</td>
-										</tr>
-										<tr class="pl window-bottom-small">
-											<td align="justify" class="window-bottom-small">
-												<div class='sizer height-5px'>XXX</div>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-							<div class='width-600 box-cell-70' >
-								<div id="intro-accordion">
-								<h3> Latest News</h3>
-								<div>
-									<div align='left' class='wrap-don'>
-									<br/><br/>
-										05/06/2021 Update v1.1.003
-										<ul class="fa-ul">
-											<li><i class="fa-li fa fa-chevron-circle-right"></i>Added support for 4.88 CEX<br/></li>
-											<li><i class="fa-li fa fa-chevron-circle-right"></i>Flash NC Exploit update v3.0<br/></li>
-											<li><i class="fa-li fa fa-chevron-circle-right"></i>FMM update v1.3.1<br/></li>
-											<li><i class="fa-li fa fa-chevron-circle-right"></i>JS Framework update v4.2<br/></li>
-										</ul>
-									</div>
-									<br/>
-									<div align='right' class='wrap-don'>
-										<i class="fa fa-border fa-quote-left fa-fw" style="font-size:8px;"></i>
-										<span style="font-size:11px;font-style:italic;">Just a minor release!</span>
-										<i class="fa fa-border fa-quote-right fa-fw" style="padding-left:5px;font-size:8px;"></i>
-									</div>
-									<br/>
-								</div>
-								<h3> General Information</h3>
-								<div>
-									<div align='left' class='wrap-don'>
-										<ul class="fa-ul">
-											<li><i class="fa-li fa fa-chevron-circle-right"></i>You are free to use the tools in this project at your own risk.
-												Keep in mind that no official support is provided, if you experience any kind of problem & find yourself in need of help, I strongly recommend that you turn to the <a href="https://www.psx-place.com/forums/PS3Xploit/" title="https://www.psx-place.com/forums/PS3Xploit/">PS3Xploit sub-forum on psx-place.com</a> for support & guidance..</li>
-											<li><i class="fa-li fa fa-chevron-circle-right"></i>The Flash Player 9 browser plugin must be enabled to use the PS3 Toolset.<br/>
-											If ever you disabled it permanently in the current user profile, you may need to log in as another user or create a new profile to be able to use any of the tools in this project.</li>
-											<li><i class="fa-li fa fa-chevron-circle-right"></i>You can enable Flash permanently by checking the "Do not display again" checkbox in the plugin confirmation screen before accepting to load the Flash plugin.</li>
-											<li><i class="fa-li fa fa-chevron-circle-right"></i>It is highly recommended that you adjust the console's System Time settings properly to avoid any time related issues with the browser and/or the Flash Player plugin.</li>
-											<li><i class="fa-li fa fa-chevron-circle-right"></i>To avoid potential crashes, you should never attempt to close the browser while toolset operations are in progress, especially when the browser exit confirmation setting is turned off.</li>
-										</ul>
-									</div>
-								</div>
-								<h3> Minimum Requirements</h3>
-								<div>
-									<div align='left' class='wrap-don'>
-										<ul class="fa-ul" style="line-height:22px;">
-											<li><i class="fa-li fa fa-chevron-circle-right" style="line-height:18px;"></i>PS3 Browser Flash Player 9 Plugin enabled<br/></li>
-											<li><i class="fa-li fa fa-chevron-circle-right" style="line-height:18px;"></i>PS3 Browser Javascript enabled<br/></li>
-											<li><i class="fa-li fa fa-chevron-circle-right" style="line-height:18px;"></i>PS3 Browser Cookies enabled<br/></li>
-											<li><i class="fa-li fa fa-chevron-circle-right" style="line-height:18px;"></i>PS3 Firmware: 4.80/4.81/4.82/4.83/4.84/4.85/4.86/4.87/4.88<br/></li>
-											<li><i class="fa-li fa fa-chevron-circle-right" style="line-height:18px;"></i>PS3 Firmware Type: OFW/HFW/MFW/CFW<br/></li>
-											<li><i class="fa-li fa fa-chevron-circle-right" style="line-height:18px;"></i>PS3 Firmware mode: CEX/DEX<br/></li>
-											<li><i class="fa-li fa fa-chevron-circle-right" style="line-height:18px;"></i>PS3 System Time accurately set<br/></li>
-										</ul>
-									</div>
-								</div>
-								<h3> Acknowledgements</h3>
-								<div>
-									<div class='wrap-don'>
-										<p>My warmest thanks to Jason, for his friendship & support of course, but in the context of this project, also for testing my work all year round whenever needed.<br/></p>
-										<br/>
-										<p>The PS3 Toolset & its GUI were built in native js upon various open source js libraries including jQuery, jQueryUI, bigInteger, jstree, mCustomScrollbar, js-logger, js-cookie, sjcl, switchButton & toastmessage as well as the Fork Awesome CSS icon library.<br/>Thanks to all the coders involved in the various projects.</p>
-										<br/>
-										<p>Thanks to ps3/vita scene hackers, developers, forum creators and psdevwiki contributors, all essential in bringing us to this point.</p>
-									</div>
-								</div>
-								<h3> Help & Donations</h3>
-								<div>
-									<div class='wrap-don'>
-										On behalf of the PS3Xploit team & users, I would like to convey our sincere thanks to all Paypal donators for their support to date, their contributions so far have allowed the team to cover the ever growing maintenance costs.<br/>
-										We need your continued support if we are to keep providing the services we offer both free & ad-free.
-										If you wish to help us, consider a donation via Paypal at team@ps3xploit.net or in BTC at either of the addresses below.<br/><br/>
-										<div class='container-qr'>
-											<div class='box-table-180'>
-												<div class='box-row'>
-													<div class='box-cell-33'>
-														<img class="qr-size" src='assets/images/qr-legacy-P2PKH.png' title='1CWjJrrV5LxeFbSZAtcGXFgJ9wepFdZAqT'>
-													</div>
-													<div class='box-cell-33'>
-														<img class="qr-size" src='assets/images/qr-native-segwit-BECH32.png' title='bc1qe8maczwynmkj3vkhz3p28kxtr0lqdefvkgrq72'>
-													</div>
-													<div class='box-cell-33'>
-														<img class="qr-size" src='assets/images/qr-PayNyms.png' title='PM8TJKzzUZAzj3hdVezaMVXN62H6fFPPoRMZ2GPfE5jQx89RRaD9xS39ft2HE5QYGJ4qsxk7eCm6EqtFEnXxM8NuWbgW9uYXFYw4gcfs5XjTkyBp3JHc'>
-													</div>
-												</div>
-												<div class='box-row'>
-													<div class='box-cell-33 pad-left-3pct'>
-														Legacy P2PKH
-													</div>
-													<div class='box-cell-33 pad-left-4pct'>
-														Segwit BECH32
-													</div>
-													<div class='box-cell-33 pad-left-3pct'>
-														PayNyms
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div id='tblog' class="tb-log" style="max-height:90%;">
-				<h2 align='right'  class='tab-header'>Logs <span class='header-tiny-text'>v1.1</span></h2>
-				<div class="max-height-620">
-					<table class="window">
-						<tbody class=''>
-							<tr class="window-header">
-								<th class="logoptions window-header ui-widget-header">
-									<div class="dir-table-auto" style="max-height:25px;height:25px;font-size:12px;">
-										<span class='min-width-410 dir-left' style="min-width:600px;width:600px;padding-left:0;">
-											<span class='sizer'>
-												<input type='checkbox' id='ilog' name='ilog' checked />
-												<label id="lilog" for="ilog" title="Logs" class="logbtn">Logs</label>
-												<input type='checkbox' class="ui-widget gui-item" id='iwarn' name='iwarn' checked />
-												<label id="liwarn" for="iwarn" title="Warnings" class="logbtn">Warnings</label>
-												<input type='checkbox' id='ierror' name='ierror' class='gui-item' checked  />
-												<label id="lierror" for="ierror" title="Errors" class="logbtn">Errors</label>
-												<input type='checkbox' id='idbg' name='idbg' class='gui-item' />
-												<label id="lidbg" for="idbg" title="Toolset Debugger logs" class="logbtn">Debug Messages</label>
-												<span style="padding-left:20px;font-size:8px;">
-													<button id="lpage_prev" class='gui-item'  style="max-width:40px;font-size:8px;margin-bottom:0.2em;"></button>
-													<span style="padding-left:5px;font-size:10px;"> Log page: </span>
-													<span id="lpage_curr"> 1</span>
-													<span>/</span>
-													<span id="lpage_ntotal"  style="padding-right:5px;">1 </span>
-													<button id="lpage_next" class='gui-item'  style="max-width:40px;font-size:8px;margin-bottom:0.2em;"></button>
-												</span>
-												<span style="padding-left:20px;">
-													<input type='checkbox' id='inet' name='inet' class='gui-item' />
-													<label for="inet" title="Toolset Debugger logs over UDP" >UDP Broadcast</label>
-													<label class='labport' for="port_txtbox" style="padding-left:5px;"> Port: </label>
-													<input type='text' id='port_txtbox' name='port_txtbox' class='gui-item port ui-corner-all' value='18194' />
-												</span>
-											</span>
-										</span>
-									</div>
-								</th>
-							</tr>
-							<tr class='max-height-620 logoptions window-content-top ui-widget-content'>
-								<td align='justify' class='window-content-top ui-widget-content'>
-								<iframe id='ifrlog' name='ifrlog'  frameborder='0'  scrolling='no' src='log.php?tk=UNVPUxcpvBNmTOX0Hm2rl3DzxrL0cnK7qowmg8Z2lkw7' class='' style='max-width:100%;width:100%;max-height:600px;height:600px;display:block;border-style:none;border-width:0;'>
-								</iframe>
-								</td>
-							</tr>
-							<tr class='pl window-bottom-small'>
-								<td align='justify' class='window-bottom-small'>
-									<div class='sizer height-5px'>XXX</div>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-		<br/>
-		<div id='dg-confirm' class='ui-helper-hidden' title=''>
-			<p><span class='ui-icon ui-icon-alert'></span><span id='dg-text' class='dg-text'></span></p>
-		</div>
-		<div class='ui-helper-hidden-accessible' >
-			<div id="explt" class='ui-helper-hidden' ></div>
-			<div id="pf" class='ui-helper-hidden' ></div>
-			<div id="FPX2" class='ui-helper-hidden' ></div>
-			<div id="TSound" class='ui-helper-hidden' ></div>
-		</div>
-	</body>
-</html>
+					if(metldr === 'metldr.2' && cfwminver){
+						metldr_err();
+					}
+					else if(metldr === 'metldr' && !cfwminver){
+						metldr_err();
+					}
+					var cfw_compat = metldr!=='metldr.2';
+					var compat = jQuery('#cfwcompat');
+					compat.parent().addClass(cfw_compat ? 'header-label on':'header off');
+					compat.addClass(cfw_compat ? 'fa fa-check fa-lg fa-fw':'fa fa-times fa-lg fa-fw');	
+					compat.css({'color':cfw_compat ? '#99c700':'#e95136','font-size':'20px','width':'30px','position':'relative','padding-top':'1px','text-shadow':'-1px -1px 0 #000,0 -1px 0 #000,1px -1px 0 #000,1px 0 0 #000,1px 1px 0 #000,0 1px 0 #000,-1px  1px 0 #000,-1px 0 0 #000'});
+					var _nor = so.is_nor();
+					var idps = getIDPS(so,_nor ? helper.idps_sector_nor : helper.idps_sector_nand);
+					var XXX = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+					var idps_hidden = false;
+					var jstree;
+					jQtree.jstree({
+						'core' : {
+							'multiple':false,
+							'restore_focus':false,
+							'dblclick_toggle':false,
+							'data' : function (node, cb) {
+								if(node.id === '#') {
+									var nodes = [{ 'id' : 'flash', 'type' : 'flash', 'parent' : '#', 'text' : 'Flash Memory' },
+									   { 'id' : 'type', 'type' : 'ros', 'parent' : 'flash', 'text' : 'Type: ?' },
+									   { 'id' : 'sectors', 'type' : 'ros', 'parent' : 'flash', 'text' : 'Number of Sectors: ?' },
+									   { 'id' : 'idps', 'type' : 'ros', 'parent' : 'flash', 'text' : 'IDPS: ?' },
+									   { 'id' : 'minver', 'type' : 'ros', 'parent' : 'flash', 'text' : 'Minimum Applicable FW Version: ?' },
+									   { 'id' : 'ros0', 'type' : 'ros', 'parent' : 'flash', 'text' : 'ROS bank 0' },
+									   { 'id' : 'ros1', 'type' : 'ros', 'parent' : 'flash', 'text' : 'ROS bank 1' },
+									   { 'id' : 'info0', 'type' : 'info', 'parent' : 'ros0', 'text' : 'Calculating SHA256 checksum, please wait...' },
+									   { 'id' : 'info1', 'type' : 'info', 'parent' : 'ros1', 'text' : 'Calculating SHA256 checksum, please wait...' },
+									   { 'id' : 'flashbk', 'type' : 'flash', 'parent' : '#', 'text' : 'Flash Memory Patch' }
+									];
+									cb(nodes);
+								 }
+							},
+							'check_callback' : function (operation, node, node_parent, node_position, more) {
+								var ret = false;
+								switch(operation){
+									case 'create_node':
+										ret= true;
+										break;
+									case 'rename_node':
+										ret= true;
+										break;
+									case 'delete_node':
+										ret= true;
+										break;
+									case 'move_node':
+										ret= true;
+										break;
+									case 'copy_node':
+										ret= true;
+										break;
+									case 'edit':
+										ret= true;
+										break;
+									default:
+									ret= false;
+								}
+								return ret;
+							}
+						},
+						'themes':{
+							'dots': true,
+							'icons': true
+						},
+						'sort' : function(a, b) {
+							return (this.get_node(a).text > this.get_node(b).text) ? 1 : -1;
+						},
+						'types' : {
+							'#' : {
+							  'max_children' : 2,
+							  'max_depth' : 3,
+							  'valid_children' : ['flash']
+							},
+							'flash' : {
+							 'max_children' : 2,
+							  'max_depth' : 2,
+							  'icon' : 'jstree-folder',
+							  'valid_children' : ['ros']
+							},
+							'ros' : {
+							  'max_children' : 1,
+							  'max_depth' : 1,
+							  'icon' : 'jstree-folder',
+							  'valid_children' : ['info']
+							},
+							'info' : {
+							  'max_children' : 0,
+							  'max_depth' : 0,
+							  'icon' : 'jstree-file',
+							  'valid_children' : []
+							}
+						  },
+						'contextmenu' :{
+							'show_at_node':true,
+							'items': function(node) {
+								var is_regmode = helper.fm_usermode === 0;
+								var is_patch_rec = helper.nofsm_hash === ldiag.getSHA256();
+								var is_cex = helper.kmode === 'CEX';
+								var _node = jstree.get_node('flashbk');
+								if(jstree.is_disabled('flashbk') && node.id === 'flashbk'){return {};}
+								var is_patch_avail = _node ? _node.children.length > 0 ? true : false : false;
+								var ret = node.id === 'flash' ? {
+										'Save': {
+											'separator_before': false,
+											'separator_after': false,
+											'label': 'Save Flash Memory Backup',
+											'icon' : 'fa fa-floppy-o fa-fw',
+											'action': function (obj) {
+												setTimeout(function(){
+													sdiag.open({
+														'sector_count': _nor ? 0x8000 : 0x77800,
+														'nsec_iter': _nor ? 0x2000 : 0x8000,//nand 0x8000 (16Mb) - nor: 0x2000 (4Mb)
+														'dump_start': 0,
+														'save_offset':0,
+														'file_path': '',
+														'default_name': 'dump.hex',
+														'tls': null,
+														'buffer': null
+													},mt_dump);
+												},0);
+											}
+										}
+									} : (node.id === 'flashbk') ? {
+										'Load': {
+											'separator_before': false,
+											'separator_after': false,
+											'label': 'Load Patch from file',
+											'icon' : 'fa fa-folder-open-o fa-fw',
+											'action': function (obj) {
+												setTimeout(function(){
+													ldiag.open();
+												},0);
+											}
+										},
+										'LoadWeb':{
+											'separator_before': false,
+											'separator_after': false,
+											'label':  'Load Patch via HTTPS',
+											'_disabled': is_cex ? helper.nofsm_url.length>0 ? false: true : true, //add more checks????
+											'icon' : 'fa fa-cloud-download fa-fw',
+											'action': function (obj) {
+												setTimeout(function(){
+													jQuery('.preloader').removeClass('ui-helper-hidden');
+													ldiag.removePatch();
+													setTimeout(function() {
+														dl_object  = {buffer: helper.sm.getBuffer(),file: helper.nofsm_url,start:new Date(),sha256:''};
+														ulog(dl_object.start,true);
+														if(!dl_object.buffer){Logger.error('loadPatch: Buffer memory allocation failed!');toast('Buffer memory allocation failed','error',5);return;}
+														pbfm1.open(false,dl_cancel);
+														pbfm1.updateStatusText('Initializing download operations');
+														pbfm1.updateProgressDialog({'glabel':'Establishing server connection','title':'Download Operations Progress'});
+														setTimeout(function() {
+															helper.swf.downloadFile(dl_object.file);//
+														},500);
+													},500);
+												},0);
+											}
+										},
+										'Download':{
+											'separator_before': false,
+											'separator_after': false,
+											'label':  'Download Patch file',
+											'_disabled': is_cex ? helper.nofsm_url.length>0 ? false: true : true, //add more checks????
+											'icon' : 'fa fa-download fa-fw',
+											'action': function (obj) {
+												document.getElementById('dlframe').src = 'file3.php?tk='+ftoken+'&file='+helper.nofsm_url;
+											}
+										},
+										'Patch': {
+											'separator_before': true,
+											'separator_after': false,
+											'label': 'Apply loaded Patch',
+											'icon' : 'fa fa-cogs fa-fw',
+											'_disabled': is_regmode ? is_patch_rec && is_cex && is_patch_avail ? false : true : is_patch_avail ? false : true , //add more checks????
+											'action': function (obj) {
+												function confirmPatch(){
+													jQuery('.preloader').removeClass('ui-helper-hidden');
+													var def = jQuery.Deferred();
+													def.promise().done(mt_patch);
+													setTimeout(function(){
+														var patch_object = {
+															'sector_count': 0x7000,
+															'patch_start': _nor ? 0x600 : 0x400,
+															'data_buffer': window.ldiag.getBuffer(),
+															'offset_data':{'ros0':_nor ? 0x20 : 0, 'ros1': _nor ? 0x20 : 0x10}
+														};
+														pbfm1.setTitle('Patching Operations Progress');
+														pbfm1.open(true);
+														def.resolve(patch_object);
+													},0);
+												}
+												if(!is_patch_rec){ //check against offcial no-fsm patch sha256 ??
+													confirmDialog('Patching the ps3 Flash Memory with this patch file is allowed because you disabled Strict Mode. Proceeding to patching using this data could be seriously risky, you have been warned. There is no way to pause or cancel the patching process beyond this confirmation dialog. Are you sure you want to continue?','Patch Confirmation',confirmPatch);
+												}
+												else{
+													confirmDialog('Patching the ps3 Flash Memory can brick your console, it should never be done casually. There is no way to pause or cancel the patching process beyond this confirmation dialog. Are you sure you want to continue?','Patch Confirmation',confirmPatch);
+												}
+											}
+										}
+									}: node.id === 'ros0' || node.id === 'ros1' ? {
+										'Save_ROS': {
+											'separator_before': false,
+											'separator_after': false,
+											'label': node.id === 'ros0' ? 'Save ROS0 data as noFSM Patch File':'Save ROS1 data as noFSM Patch File',
+											'icon' : 'fa fa-floppy-o fa-fw',
+											'_disabled': is_regmode ? true:false,
+											'action': function (obj) {
+												setTimeout(function(){
+													sdiag.open( node.id === 'ros0' ? {
+															'sector_count': 0x3800,
+															'nsec_iter': 0x3800,//nand 0x8000 (16Mb) - nor: 0x2000 (4Mb)
+															'dump_start': _nor ? 0x600:0x400,
+															'save_offset': _nor ? 0x10:0x30,
+															'file_path': '',
+															'default_name': 'ros0.hex',
+															'buffer': null
+														}: {
+															'sector_count': 0x3800,
+															'nsec_iter': 0x3800,//nand 0x8000 (16Mb) - nor: 0x2000 (4Mb)
+															'dump_start': _nor ? 0x3E00:0x3C00,
+															'save_offset': _nor ? 0x10:0x20,
+															'file_path': '',
+															'default_name': 'ros1.hex',
+															'buffer': null
+														},mt_dump);
+												},0);
+											}
+										}
+									}: (node.id === 'idps') ? {
+										'Toggle': {
+											'separator_before': false,
+											'separator_after': false,
+											'label': idps_hidden ? 'Show IDPS': 'Hide IDPS',
+											'icon' : idps_hidden ? 'fa fa-unlock-alt fa-fw': 'fa fa-lock fa-fw',
+											'action': function (obj) {
+												idps_hidden ? jstree.rename_node('idps', 'IDPS: '+idps.toUpperCase()) : jstree.rename_node('idps', 'IDPS: '+XXX);
+												idps_hidden = !idps_hidden;
+	//u64 value=0;
+	//lv2_ss_update_mgr_if(UPDATE_MGR_PACKET_ID_READ_EPROM, QA_FLAG_OFFSET, (uint64_t) &value, 0, 0, 0, 0);
+		
+	// var rvalue = helper.heap.store(8);
+	// var scret = helper.rop.rrun(syscall32(863,0x600b,0x48C61,rvalue,0, 0, 0, 0));
+	// alert('syscall returned 0x'+scret.toString(16));
+	// alert('value 0x'+helper.memory.upeek32(rvalue).toString(16)+helper.memory.upeek32(rvalue+4).toString(16));
+	// helper.heap.free([rvalue]);
+		
+		
+											}
+										},
+										'Save':{
+											'separator_before': false,
+											'separator_after': false,
+											'label':  'Save IDPS as file',
+											'icon' : 'fa fa-floppy-o fa-fw',
+											'action': function (obj) {
+												setTimeout(function(){
+													sdiag.open( {
+															'file_path': '',
+															'idps':idps,
+															'default_name': 'idps.hex'
+														},idps_dump);
+												},0);
+											}
+										}
+									}:{};
+								return ret;
+							}
+						},
+						'conditionalselect' : function (node, event) {
+							if(node.type === 'flash' || node.id === 'ros0' || node.id === 'ros1'|| node.id === 'idps'){return true;}
+							else {return false;}
+						},
+						'plugins' : [
+							'search', 'types', 'changed', 'contextmenu', 'unique', 'sort', 'conditionalselect'//,
+						]
+					});
+					jQtree.on('select_node.jstree', function (e, data) {
+						var evt =  window.event || e;
+						var button = evt.which || evt.button;
+						if( button != 1 && ( typeof button != 'undefined')) 
+							return false; 
+						else if(data.event){
+							setTimeout(function() {
+								data.instance.show_contextmenu(data.node, evt.offsetX,evt.offsetY, data.event);
+							}, 0);
+							return true;
+						}
+					});
+					//alert('fmm ros hashing');
+					jstree = jQtree.jstree(true);
+					jstree.rename_node('type', _nor ? 'Flash Memory Type: NOR 16Mb' : cfw_compat ? 'Flash Memory Type: NAND 256Mb':'Flash Memory Type: eMMC 256Mb');
+					jstree.rename_node('sectors', _nor ? 'Number of Sectors: 0x8000' : 'Number of Sectors: 0x80000 (0x77800 in dump)');
+					jstree.rename_node('idps', 'IDPS: '+idps.toUpperCase());
+					if(!cfw_compat){jstree.disable_node('flashbk');}
+					var ros0_ref = '';
+					var ros1_ref = '';
+					var ros0_new = '';
+					var ros1_new = '';
+					var sha256_ref = '';
+					var sha256_pending = false;
+					this.refreshFM_node = function(cb){
+						//alert('fmm refreshFM_node');
+						sha256_pending = true;
+						jstree.rename_node('info0','Calculating SHA256 checksum, please wait...');
+						jstree.rename_node('info1','Calculating SHA256 checksum, please wait...');
+						var sbuf = helper.sm.getBuffer();
+						if(!sbuf){
+							helper.sp.playNG();
+							Logger.error('SHA256 Extraction failed. No buffer available.');
+							toast('If the toolset keeps getting errors when allocating buffer memory, you should restart the console.','error',5);
+							jQuery().toastmessage('removeToast', close_toast);
+							jQuery('.preloader').removeClass('ui-helper-hidden').addClass('ui-helper-hidden');
+							return;
+						}
+						//alert('sbuf: 0x'+sbuf.offset.toString(16)+' - size 0x'+sbuf.size.toString(16));
+						var tl = helper.worker['fmm'].getTLS();
+						if(!tl){
+							Logger.error('SHA256 Extraction: TLS memory allocation failed!');
+							toast('TLS memory allocation failed','error',5);
+							return;
+						}
+						//alert('fmm ROSHashObject');
+						var rosH = new ROSHashObject(so,{'dump_start':so.is_nor() ? 0x600: 0x400,'data_buffer':sbuf,'tls':tl});
+						if(rosH.error.code>0){
+							Logger.error('SHA256 Extraction: ROSHashObject creation failed!');
+							toast('SHA256 Extraction failed','error',5);
+							return;
+						}
+						//TO-DO:
+						//Show spinner
+						function sha256_cleanup(){
+							//alert('sha256_cleanup');
+							so.close();
+							delete rosH;
+							enable_GUI();
+							jQuery().toastmessage('removeToast', close_toast);
+							jQuery('.refresh-fm').removeClass('ui-state-disabled');
+							jQuery('.preloader').removeClass('ui-helper-hidden').addClass('ui-helper-hidden');
+						}
+						function sha256_error(str){
+							//alert(str);
+							jstree.rename_node('info0','SHA256: Extraction Error');
+							jstree.rename_node('info1','SHA256: Extraction Error');
+							jstree.rename_node('minver','Minimum Applicable Firmware Version: '+helper.minver);
+							jstree.open_all('flash');
+							sha256_pending = false;
+							sha256_cleanup();
+						}
+						ros0_ref = ros0_new;
+						ros1_ref = ros1_new;
+						//alert('fmm workers call 1');
+						helper.worker['fmm'].run(rosH.sfx[0],'ROS Data Extraction',function(){Logger.info('Extracting data from Flash Memory ROS regions');},function(){
+								//alert('fmm ros data extraction');
+								function checkArr(arr,val){
+									var good=true;
+									for(var st=0;st<arr.length;st++){
+										if(helper.memory.upeek32(arr[st])===val){
+											//alert('problem at index 0x'+st.toString(16)+' Offset: 0x'+arr[st].toString(16));
+											good=false;
+											break;
+										}
+									}
+									return good;
+								}
+								if(!checkArr(rosH.rlen,0xFFFFFFFF)){
+									sha256_error('ROS Extraction error');
+									return;
+								}
+								else{
+									//Logger.trace(rosH.log[0]);
+									jstree.rename_node('minver','Minimum Applicable Firmware Version: '+helper.minver);
+								}
+						});
+						//alert('fmm workers call 2');
+						helper.worker['fmm'].run(rosH.sfx[1],'ROS1 Data hashing',function(){Logger.info('ROS1 Data hashing');},function(){
+								//alert('fmm ros1 hashing');
+								ros1_new = helper.memory.upeeks(rosH.hash_r1, 0x20, false).toUpperCase();
+								if(ros1_new ==='FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'){
+									sha256_error('ROS 1 hashing error');
+									return;
+								}
+								//Logger.trace(rosH.log[1]);
+								//Logger.info('ROS 1 hash: '+ros1_new);
+								jstree.rename_node('info1','SHA256: '+ ros1_new);
+						});
+						//alert('fmm workers call 3');
+						helper.worker['fmm'].run(rosH.sfx[2],'ROS0 Data hashing',function(){Logger.info('ROS0 Data hashing');},function(){
+								//alert('fmm ros0 hashing');
+								ros0_new = helper.memory.upeeks(rosH.hash_r0, 0x20, false).toUpperCase();
+								if(ros0_new==='FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'){
+									sha256_error('ROS 0 hashing error');
+									return;
+								}
+								//Logger.trace(rosH.log[2]);
+								//Logger.info('ROS 0 hash: '+ros0_new);
+								jstree.rename_node('info0','SHA256: '+ ros0_new);
+								jstree.open_all('flash');
+								sha256_pending = false;
+								helper.sp.playOK();
+								if(cb){cb(this.changedROS());}
+								sha256_cleanup();
+								Logger.info('ROS SHA256 checksums <br>ROS0 = '+ros0_new+'<br>ROS1 = '+ros1_new);
+								//setTimeout(helper.sp.playOK,750);
+						});
+					};
+					this.isSHA256Pending = function(){
+						return sha256_pending;
+					};
+					this.checkFMSHA256 = function(){
+						var fp_hashref = ldiag.getSHA256();
+						Logger.info('checkFMSHA256: Patch File Hash: 0x'+fp_hashref);
+						Logger.info('checkFMSHA256: ROS0 Hash: 0x'+ros0_new);
+						Logger.info('checkFMSHA256: ROS1 Hash: 0x'+ros1_new);
+						return {'ros0':ros0_new === fp_hashref, 'ros1':ros1_new === fp_hashref};
+					};
+					this.changedROS = function(){
+						return !(ros0_new === ros0_ref && ros1_new === ros1_ref);
+					};
+					this.refreshFM_node();
+				};
+				var pbfmDialog = function(){
+					// jQuery('#fm_cont_status').remove();
+					// jQuery('#dicon_status').remove();
+					// jQuery('#dfm_status').remove();
+					// jQuery('#plfm_gstatus').remove();
+					// jQuery('#gfmprogressbar_val').remove();
+					// jQuery('#gfmprogressbar').remove();
+					// jQuery('#plfm_dstatus').remove();
+					// jQuery('#dprogressbar').remove();
+					// jQuery('#dprogressbar_val').remove();
+					jQuery('.pbfmDialog').remove();
+					var f = document.createElement('fieldset');
+					f.className = 'df ui-widget-content ui-corner-all';
+					var d0 =  document.createElement('div');
+					d0.id = 'fm_cont_status';
+					d0.className = 'diag-fm-cont-status pbfmDialog';
+					var d1 = document.createElement('div');
+					d1.id = 'dfm_status';
+					d1.className = 'diag-fm-status progress-label ui-widget-content ui-corner-all pbfmDialog';
+					d1.innerText = '....';
+					var ic = document.createElement('div');
+					ic.id = 'dicon_status';
+					ic.className = 'icon-status hourglass pbfmDialog';
+					d0.appendChild(d1);
+					d0.appendChild(ic);
+					var d2 = document.createElement('div');
+					d2.id = 'plfm_gstatus';
+					d2.className = 'diag-plfm-gstatus progress-label ui-widget-content ui-corner-all pbfmDialog';
+					d2.innerText = '....';
+					var d3 = document.createElement('div');
+					d3.id = 'gfmprogressbar_val';
+					d3.className = 'progress-val pbfmDialog';
+					var d4 = document.createElement('div');
+					d4.id = 'gfmprogressbar';
+					d4.className = 'diag-gfmprogressbar pbfmDialog';
+					d4.appendChild(d3);
+					var d5 = document.createElement('div');
+					d5.id = 'plfm_dstatus';
+					d5.className = 'diag-plfm-dstatus progress-label ui-widget-content ui-corner-all pbfmDialog';
+					d5.innerText = '....';
+					var d6 = document.createElement('div');
+					d6.id = 'dprogressbar';
+					d6.className = 'diag-dprogressbar pbfmDialog';
+					var d7 = document.createElement('div');
+					d7.id = 'dprogressbar_val';
+					d7.className = 'progress-val pbfmDialog';
+					d6.appendChild(d7);
+					jQuery('#dfmProgress').removeClass('ui-helper-hidden');
+					var container = jQuery('#dfmProgress').append(f);
+					container.find(f).append([d0,d2,d3,d4,d5,d6]);
+					var cancel_ops=false;
+					var progressbarg = jQuery('#gfmprogressbar');
+					var progressbard = jQuery('#dprogressbar');
+					var progressStatus = jQuery('#dfm_status');
+					var progressgLabel = jQuery('#plfm_gstatus');
+					var progressdLabel = jQuery('#plfm_dstatus');
+					var pbg_val = jQuery('#gfmprogressbar_val');
+					var pbd_val = jQuery('#dprogressbar_val');
+					var setIcon = function(_class){
+						jQuery.each(jQuery('#dicon_status'),function(idx,el){
+							jQuery(el).attr('class','icon-status '+_class);
+						});
+					};
+					var dialogButtons = [{text: 'Cancel', icon: 'ui-icon-close', click: function(event, ui){
+						function confirmCancel(){
+							cancel_ops=true;
+						}
+						confirmDialog('Do you really wish to stop the operations in progress?','Cancel',confirmCancel);
+					}}];//
+					var jQdialog = container.dialog({
+						autoOpen: false,
+						modal: true,
+						closeOnEscape: false,
+						resizable: false,
+						height: 395,
+						width: 500,
+						buttons: dialogButtons,
+						show: { effect: 'fade', duration: 1500 },
+						hide: { effect: 'fade', duration: 800 },
+						open: function(event, ui ) {
+							//TO DO:
+							// disable both trees & other tabs
+							setIcon('hourglass');
+							progressgLabel.text( 'Generating worker thread data' );
+							progressdLabel.text( 'Idle' );
+							pbg_val.text( '' );
+							pbd_val.text( '' );
+							progressbarg.progressbar('value', false);
+							progressbard.progressbar('value', false);
+							progressStatus.text( 'Initializing Operations' );
+							cancel_ops = false;
+						 }
+					});
+					progressbarg.progressbar({
+						value: false,
+						change: function(event, ui) {
+							var val = progressbarg.progressbar( 'value' );
+							var txt =  (val !== false) ? val + '%' : '' ;
+							pbg_val.text(txt);
+						},
+						complete: function(event, ui) {
+							pbg_val.text( 'Done' );
+							pbd_val.text( 'Done' );
+							jQdialog.dialog( 'option', 'buttons', [
+								{text: 'Log',  icon: 'ui-icon-info', click: function(event, ui){
+									function showuLog(){
+										jQuery('#dfmProgress').parent().find('button:last').focus().blur();
+									}
+									infoDialog(jQuery('#ulog').html(),'Log',showuLog);
+								}},
+								{text: 'Close', icon: 'ui-icon-check', click: function(event, ui){
+									jQdialog.dialog( 'option',{ close: function(event,ui){}});
+									jQdialog.dialog('close');
+								}}]
+							);
+						}
+					});
+					progressbard.progressbar({
+						value: false,
+						change: function(event, ui) {
+							var val = progressbard.progressbar( 'value' );
+							var txt =  (val !== false) ? val + '%' : '' ;
+							pbd_val.text(txt);
+						},
+						complete: function(event, ui ) {
+						}
+					});
+					this.setIconStatus = function(val){
+						setIcon(val);
+					};
+					this.updateGlobalValue = function(val){
+						progressbarg.progressbar('value', val > 0 && val < 100 && Math.floor(val)!==val ? Math.floor(val)+1 : Math.floor(val));
+					};
+					this.updateDetailValue = function(val){
+						progressbard.progressbar('value', Math.floor(val));
+					};
+					this.updateGlobalLabel = function(txt){
+						progressgLabel.text( txt );
+					};
+					this.updateDetailLabel = function(txt){
+						progressdLabel.text( txt );
+					};
+					this.updateStatusText = function(txt){
+						progressStatus.text( txt );
+					};
+					this.getStatusText = function(){
+						return progressStatus.text();
+					};
+					this.setTitle = function(txt){
+						jQdialog.dialog( 'option', 'title', 'Flash Memory Manager: '+txt );
+					};
+					this.updateStatusStyle = function(obj){
+						progressStatus.css( obj );
+					};
+					this.updateProgressDialog = function(obj,st){
+						if(obj.istatus)pbfm1.setIconStatus(obj.istatus);
+						if(obj.title)pbfm1.setTitle(obj.title);
+						if(st)pbfm1.updateStatusText(getElapsedTime(st));
+						if(obj.dlabel)pbfm1.updateDetailLabel(obj.dlabel);
+						if(obj.glabel)pbfm1.updateGlobalLabel(obj.glabel);
+						if(obj.dvalue)pbfm1.updateDetailValue(obj.dvalue);
+						if(obj.gvalue)pbfm1.updateGlobalValue(obj.gvalue);
+						jQuery('#dfmProgress').parent().find('button').blur();
+					};
+					this.open = function(noCancel,cb){
+						if(noCancel===true){
+							jQdialog.dialog( 'option', 'buttons', [{text: 'Cancel', icon: 'ui-icon-close', click: function(event, ui){toast('Current operations cannot be cancelled','warning',3);return;}}]);
+							jQdialog.dialog( 'option', 'classes.ui-dialog', 'no-close' );
+							jQdialog.dialog( 'option',{ close: function(event,ui){}});
+						}
+						else{
+							if(cb){
+								jQdialog.dialog( 'option',{close: function(event,ui){
+									cb();
+								}});
+								jQdialog.dialog( 'option', 'buttons', 
+									[{text: 'Cancel', icon: 'ui-icon-close', click: function(event, ui){
+										function confirmCancel(){
+											jQdialog.dialog( 'close');
+										}
+										confirmDialog('Do you really wish to stop the operations in progress?','Cancel',confirmCancel);
+									}}]
+								);
+							}
+							else{
+								jQdialog.dialog( 'option', 'buttons', dialogButtons);
+								jQdialog.dialog( 'option',{ close: function(event,ui){}});
+							}
+							jQdialog.dialog( 'option', 'classes.ui-dialog', 'ui-dialog-titlebar-close' );
+						}
+						jQuery('.preloader').removeClass('ui-helper-hidden').addClass('ui-helper-hidden');
+						jQdialog.parent().find('.ui-dialog-titlebar-close').prop('title','');
+						jQuery(document).tooltip();
+						jQdialog.dialog( 'open');
+					};
+					this.close = function(){
+						jQdialog.dialog( 'close');
+					};
+					this.cancel = function(){
+						cancel_ops = true;
+					};
+					this.cancelled = function(){
+						return cancel_ops;
+					};
+				};
+				var cleanup = function(obj){
+					ulog('Flash Memory Dump Operations Cleanup');
+					var serr=so.close();
+					if(serr!==0){ulog('Flash Memory Storage Object Close Error: 0x'+serr.toString(16));}
+					var ferr= obj.f.close();
+					delete obj.f;
+					obj.f=null;
+					if(ferr!==0){ulog('File Object Close error: 0x'+ferr.toString(16));}
+					obj.d.log=null;
+					obj.d.rret=null;
+					obj.d.wret=null;
+					obj.d.rlen=null;
+					obj.d.wlen=null;
+					obj.d.sfr=null;
+					obj.d.sfw=null;
+					delete obj.d;
+					obj.d=null;
+					obj=null;
+				};
+				var result = function(obj){
+					helper.sp.playOK();
+					cleanup(obj);
+					setTimeout(function(){
+						toast('Dump process completed successfully','success',5);
+						pbfm1.updateProgressDialog({'gvalue':100,'glabel':'Created Dump File \''+obj.filename+'\'','istatus':'success-image'});
+						toast('The validity of a dump should always be confirmed by a proper validator tool such as pyPS3checker','notice',5);
+						//setTimeout(helper.sp.playOK,250);
+					},100);
+				};
+				var failed = function(obj){
+					helper.sp.playNG();
+					ulog('Flash Memory Dump Process Error<br>'+obj.error.toString(16));
+					pbfm1.updateStatusText(obj.status);
+					pbfm1.updateProgressDialog({'dlabel':obj.error,'glabel':'Dump Operations Failure','dvalue':100,'gvalue':100,'istatus':'error-image'});
+					toast('An error occurred during the Dump process. Check the log for details.','error',5);
+					cleanup(obj);
+				};
+				var inProgress = function(obj){
+					pbfm1.updateStatusText(obj.status);
+					pbfm1.updateProgressDialog({'dlabel':obj.dlab,'glabel':obj.glab,'dvalue':obj.dval,'gvalue':obj.gval});
+				};
+				var deferred=null;
+				var mt_dump = function(dump_object){
+					if(!dump_object){return;}
+					var _nor = so.is_nor();
+					var start = new Date();
+					ulog(start,true);
+					Logger.warn('Dump start'+getElapsedTime(start));
+					try{
+						var idx = dump_object.file_path.lastIndexOf('/');
+						var filename = dump_object.file_path.substr(idx+1,dump_object.file_path.length-idx-1);
+						var szout = dump_object.save_offset>0 ? helper.patchfile_size.toString(16): (dump_object.sector_count*helper.sector_size).toString(16);
+						var norout = _nor ?  'NOR': 'NAND';
+						ulog('Dump Parameters:<br>Total Sector Count: 0x'+dump_object.sector_count.toString(16)+
+						'<br>Dump Start Offset: 0x'+dump_object.dump_start.toString(16)+
+						'<br>Dump File Path: '+dump_object.file_path+
+						'<br>Dump File Size: 0x'+szout+' bytes'+
+						'<br>Flash Memory Storage Object created'+
+						'<br>Detected Type: '+norout
+						);
+						var f = new fileObject(dump_object.file_path,helper.fs_flag_create_rw);
+						Logger.warn('fileObject created'+getElapsedTime(start));
+						ulog(f.size>0 ? 'File IO Overwriting '+dump_object.file_path : 'File IO Creating '+dump_object.file_path );
+						//Logger.error('Socket Handle 0x'+so.device_handle.toString(16));
+						var d = new dumpObject(so,f,dump_object);
+						Logger.warn('dumpObject '+getElapsedTime(start));
+						var max_it = Math.floor(dump_object.sector_count/dump_object.nsec_iter);
+						var rem_sec = dump_object.sector_count - (max_it*dump_object.nsec_iter);
+						var inc = rem_sec===0 ? 100/max_it : max_it>0 ? 100/(max_it+1) : 100;
+						var tsz_written=0
+						var pbdetails = 0;
+						var pbglobal = 0;
+						var pblabdetails = 'Preparing Target File';
+						var pblabglobal = 'Starting Dump Operations';
+						deferred = jQuery.Deferred();
+						deferred.promise().then(result,failed,inProgress);
+						Logger.warn('Promise '+getElapsedTime(start));
+						var sread = function(obj){
+							if(deferred.state()!=='pending'){
+								return;
+							}
+							else if(pbfm1.cancelled()){
+								deferred.reject({'f':f,'d':d,'error':'Dump Operations Cancelled By User','status':getElapsedTime(start)});
+								return;
+							}
+							pblabdetails = obj.index!==0 ? 'Saving Extracted Data to File' : 'Extracting Flash Memory Data' ;//
+							pbdetails = 0;
+							setTimeout(function(){
+								deferred.notify({'glab': pblabglobal,'dlab': pblabdetails,'gval': pbglobal,'dval': pbdetails,'status':getElapsedTime(start)});
+							},0);
+							ulog('Flash Memory IO Current Sector: 0x'+(obj.index*obj.value + dump_object.dump_start).toString(16)+'<br>Flash Memory IO Reading 0x'+obj.value.toString(16)+' sectors');
+							for(var t=0;t<d.rlen[obj.index].length;t++){
+								var rlen = helper.memory.upeek32(d.rlen[obj.index][t]);
+								var err = helper.memory.upeek32(d.rret[obj.index][t]);
+								if(err!==0 || rlen === 0 || rlen > 0x800  ){
+									deferred.reject({'f':f,'d':d,'error':err === 0xFFFFFFFF ?  'Thread Synchronization error' : err === 0 ? 'Invalid Flash Memory Read Length 0x'+rlen.toString(16) : 'Flash Memory Read Error 0x'+err.toString(16),'status':getElapsedTime(start)});
+									return;
+								}
+							}
+							helper.worker['fmm'].run(d.sfw[obj.index],'Writing Data to File',function(){Logger.info('Writing Data to File');},function(){check_write(obj);});
+							return;
+						};
+						var check_write = function(obj){
+							if(deferred.state()!=='pending'){
+								return;
+							}
+							else if(pbfm1.cancelled()){
+								deferred.reject({'f':f,'d':d,'error':'Dump Operations Cancelled by User','status':getElapsedTime(start)});
+								return;
+							}
+							var err = helper.memory.upeek32(d.wret[obj.index]);
+							var fnl = rem_sec > 0 ? max_it : max_it-1;
+							var size = dump_object.save_offset!==0 ? helper.patchfile_size: obj.value*helper.sector_size;
+							pblabdetails = obj.index!==fnl ? 'Extracting Data from Flash Memory':'Dump Operations Complete';//
+							pbdetails = 100;
+							pbglobal += inc;
+							pbglobal = pbglobal===100 ? 99 : pbglobal;
+							ulog('<br>'+new Date());
+							var szw = helper.memory.upeek32(d.wlen[obj.index]+0x4);
+							if(err!==0 || szw!==size){
+								f.size += szw;
+								var errstr = err > 0 ? ' 0x' + err.toString(16) : '';
+								Logger.error('Dump Object mt_save error: '+ errstr + '<br>Dump Object mt_save Data Size:  0x'+szw.toString(16)+' bytes written to file - Expected: 0x'+size.toString(16)+' bytes');
+								deferred.reject({'f':f,'d':d,'error':err === 0xFFFFFFFF ?  'Thread Synchronization error' : 'File Save IO Error 0x'+err.toString(16),'status':getElapsedTime(start)});
+								return;
+							}
+							f.size += size;
+							tsz_written +=parseFloat(Math.round((szw/0x100000) * 100) / 100);
+							pblabglobal = 'Saved '+tsz_written.toString()+' Mb to \''+filename+'\'';//
+							setTimeout(function(){
+								deferred.notify({'glab': pblabglobal,'dlab': pblabdetails,'gval': pbglobal,'dval': pbdetails,'status':getElapsedTime(start)});
+							},0);
+							Logger.info(d.log[obj.index]);
+							//Logger.trace(d.log[obj.index]);
+							ulog('File IO Total Size Written to File '+tsz_written.toString()+'Mb');
+							if(obj.index===fnl){
+								Logger.warn('Dump Complete '+getElapsedTime(start));
+								setTimeout(function(){
+									ulog('Flash Memory successfully dumped in<br>'+dump_object.file_path);
+									deferred.resolve({'f':f,'d':d,'filename':filename});
+								},0);
+							}
+							else {
+								
+								var ix = obj.index+1;
+								ix = ix < max_it ? ix : rem_sec > 0 && ix === max_it ? ix : 0;
+								if(ix>0){
+									helper.worker['fmm'].run(d.sfr[ix],'Reading Data from Flash Memory',function(){Logger.info('Reading Data from Flash Memory');},function(){
+										sread({'index':ix,'value': ix < max_it ? dump_object.nsec_iter : rem_sec});
+									});
+								}
+							}
+						};
+						helper.worker['fmm'].run(d.sfr[0],'Reading Data from Flash Memory',function(){Logger.info('Reading Data from Flash Memory');},function(){sread({'index':0,'value':max_it > 0 ? dump_object.nsec_iter : rem_sec > 0 ? rem_sec : 0});});
+					}
+					catch(e){
+						Logger.error('<h2><b>JS Exception: </b></h2><br>'+e);
+					}
+				};
+				var idps_dump = function(iobj){
+					var idps_offset = helper.heap.store(iobj.idps.toUpperCase());
+					var fo = new fileObject(iobj.file_path, helper.fs_flag_create_rw);
+					var iret = fo.save({'offset':idps_offset,'size':0x10},0x10,null,null);
+					fo.close();
+					delete fo;
+					if(iret==0){
+						infoDialog('IDPS saved at '+ iobj.file_path,'Saved IDPS',function(){});
+					}
+					else{
+						infoDialog('Error 0x'+iret.toString(16)+' saving IDPS at '+ iobj.file_path,'Error saving IDPS',function(){});
+					}
+					helper.heap.free([idps_offset]);
+				};
+				var mt_patch = function(patch_object){
+					if(!patch_object){return;}
+					var _nor = so.is_nor();
+					var start = new Date();
+					ulog(start,true);
+					try{
+						var norout = _nor ?  'NOR': 'NAND';
+						ulog('Patch Parameters:<br>Patch Total Sector Count: 0x'+patch_object.sector_count.toString(16)+
+							'<br>Patch Start Offset: 0x'+patch_object.patch_start.toString(16)+
+							'<br>Flash Memory Storage Object created'+
+							'<br>Detected Type: '+norout
+						);
+						var po = new patchObject(so,patch_object);
+						var cleanup = function(){
+							var serr=so.close();
+							if(serr!==0){ulog('Flash Memory Storage Object Close Error: 0x'+serr.toString(16));}
+							delete po;
+							ulog('Flash Memory Patching Operations Cleanup');
+						};
+						var result = function(){
+							helper.sp.playOK();
+							ulog('Flash Memory successfully patched');
+							cleanup();
+							setTimeout(function(){
+								toast('You can reboot your console.','success',5);
+								pbfm1.updateProgressDialog({'gvalue':100,'glabel':'Patch applied successfully','istatus':'success-image'});
+								
+							},750);
+							//setTimeout(helper.sp.playOK,1500);
+						};
+						var failed = function(o){
+							helper.sp.playNG();
+							ldiag.removePatch();
+							ulog('Flash Memory Patching Process Error<br>'+o.error.toString(16));
+							pbfm1.updateStatusText(o.status);
+							pbfm1.updateProgressDialog({'dlabel':o.error,'glabel':'Patching Operations Failure','dvalue':100,'gvalue':100,'istatus':'error-image'});
+							cleanup();
+							if(o.recalculateSHA===true){
+								ulog('Checking for Flash Memory changes');
+								ft1.refreshFM_node(function(changes){
+									if(changes === true){
+										ulog('Data was written to the Flash Memory. DO NOT REBOOT without fixing the ROS regions first.');
+										toast('An error occurred during the patching process & data was written to the Flash Memory. DO NOT reboot the console with the Flash Memory in the current state. Check the log for details.','error',5);
+										Logger.error('Patching failed and data was written to the Flash Memory. You must repair the damage. DO NOT REBOOT.');
+									}
+									else{
+										ulog('No data was written to the Flash Memory.');
+										Logger.warn('Patching failed but no data has been written to the Flash Memory.');
+										toast('An error occurred during the patching process but no data has been written to the Flash Memory. It should be safe to reboot. Check the logs for details.','warning',5);
+									}
+								});
+							}
+						};
+						var inProgress = function(o) {
+							pbfm1.updateStatusText(o.status);
+							pbfm1.updateProgressDialog({'dlabel':o.dlab,'glabel':o.glab,'dvalue':o.dval,'gvalue':o.gval});
+						};
+						deferred = jQuery.Deferred();
+						deferred.promise().then(result,failed,inProgress);
+						var patchROS = function(idx){
+							var pbdetails = 0;
+							var pbglobal = idx*40;
+							var pblabdetails = 'Patching Flash Memory Region ROS'+idx.toString();
+							var pblabglobal = 'Flash Memory Patch Operations';
+							if(deferred.state()!=='pending'){
+								return;
+							}
+							var cp = 0;
+							for(var i = po.ret[idx].length-1;i >= 0;i--){
+								if(helper.memory.upeek32(po.ret[idx][i])=== 0xFFFFFFFF){ret++;}
+							}
+							if(cp>0){
+								deferred.reject({'error':'Flash Memory Write Operations failed','status':getElapsedTime(start),'recalculateSHA': cp===po.ret.length ? false : true});
+								return;
+							}
+							var offt = idx===0 ? patch_object.data_buffer.offset + patch_object.offset_data.ros0 : patch_object.data_buffer.offset + patch_object.offset_data.ros1;
+							Logger.info('Patching ROS'+idx.toString()+' with buffered data at 0x'+offt.toString(16));
+							setTimeout(function(){
+								deferred.notify({'glab': pblabglobal,'dlab': pblabdetails,'gval': pbglobal,'dval': pbdetails,'status':getElapsedTime(start)});
+							},0);
+							var cnt=0;
+							for(var t = po.wlen[idx].length-1;t >= 0;t--){
+								var wlen = helper.memory.upeek32(po.wlen[idx][t]);
+								if(wlen === 0 || wlen===0xFFFFFFFF){cnt++;}
+							}
+							if(cnt>0){
+								deferred.reject({'error':'Flash Memory Write Operations failed some sectors without errors','status':getElapsedTime(start),'recalculateSHA': cnt===po.wlen.length ? false : true});
+								return;
+							}
+							pbglobal = idx*40 + 20;
+							setTimeout(function(){
+								deferred.notify({'glab': pblabglobal,'dlab': pblabdetails,'gval': pbglobal,'dval': pbdetails,'status':getElapsedTime(start)});
+							},0);
+							ulog('ROS'+idx.toString()+' patch operations completed without errors');
+							Logger.info(po.log[idx]);
+							//Logger.trace(po.log[idx]);
+							if(idx === 0){
+								if(!_nor){helper.memory.upoke32(patch_object.data_buffer.offset+0x14,0);}
+								helper.worker['fmm'].run(po.sfp[1],'Patching ROS1 Data',function(){Logger.info('Patching ROS1 Data');},function(){patchROS(1);});
+							}
+							else{
+								ulog('Calculating SHA256 checksum for ROS banks 0 & 1');
+								Logger.info('Calculating ROS banks SHA256 hashes');
+								pblabglobal = 'Flash Memory Post Patching Data Verifications';
+								pblabdetails = 'Calculating SHA256 checksums';
+								pbdetails = 0;
+								deferred.notify({'status': getElapsedTime(start),'glab': pblabglobal,'dlab': pblabdetails,'gval': pbglobal,'dval': pbdetails});
+								ldiag.removePatch();
+								ft1.refreshFM_node();
+								pbglobal = 80;
+								pbdetails = 50;
+								function checkSHA256(){
+									deferred.notify({'status': getElapsedTime(start),'glab': pblabglobal,'dlab': pblabdetails,'gval': pbglobal,'dval': pbdetails});
+									if(ft1.isSHA256Pending()=== true){pbglobal = 90;pbdetails = 75;setTimeout(checkSHA256,250);return;}
+									setTimeout(function(){
+										var status = ft1.checkFMSHA256();
+										if(status.ros0 && status.ros1){
+											ulog('Patch applied on ROS bank 0: YES<br>Patch applied on ROS bank 1: YES');
+											pbglobal = 99;
+											pbdetails = 100;
+											pblabdetails = 'Idle';
+											deferred.notify({'status': getElapsedTime(start),'glab': pblabglobal,'dlab': pblabdetails,'gval': pbglobal,'dval': pbdetails});
+											setTimeout(function(){
+												deferred.resolve();
+											},200);
+										}
+										else{
+											var r0 = status.ros0 ? 'MATCH' : 'NO MATCH';
+											var r1 = status.ros1 ? 'MATCH' : 'NO MATCH';
+											Logger.info('SHA256 checksum for ROS bank 0 vs patch file checksum : '+r0+'<br>SHA256 checksum for ROS bank 1 vs patch file checksum : '+r1);
+											var u_r0 = status.ros0 ? 'YES' : 'NO';
+											var u_r1 = status.ros1 ? 'YES' : 'NO';
+											ulog('Patch applied on ROS bank 0: '+u_r0+'<br>Patch applied on ROS bank 1: '+u_r1);
+											deferred.reject({'status':getElapsedTime(start),'error':'SHA256 verification failed.','recalculateSHA':false});
+										}
+									},250);
+								}
+								checkSHA256();
+							}
+						};
+						helper.worker['fmm'].run(po.sfp[0],'Patching ROS0 Data',function(){Logger.info('Patching ROS0 Data');},function(){patchROS(0);});
+					}
+					catch(e){
+						Logger.error('<h2><b>JS Exception: </b></h2><br>'+e);
+					}
+				};
+				
+				if(helper.worker['fmm']){
+					sdiag = new sDialog();
+					ldiag = new lDialog();
+					pbfm1 = new pbfmDialog();
+					var ft_toast = toast('Extracting Data from the Flash Memory. Please wait...','warning',120);
+					jQuery( '#accordion' ).accordion({
+						event: 'mouseover' 
+					});
+					setTimeout(function(){
+						ft1 = new fTree(ft_toast);
+						jQuery(document).tooltip();
+					},1500);
+				}
+				else {Logger.error('FMM Worker Thread creation failed');}
+				</script>
